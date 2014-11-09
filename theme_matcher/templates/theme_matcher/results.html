@@ -13,6 +13,7 @@
 		<li><a href="#tokens" role="tab" data-toggle="tab">Tokens</a></li>
 		<li><a href="#bag-of-words" role="tab" data-toggle="tab">Bag of Words</a></li>
 		<li><a href="#pos-tags" role="tab" data-toggle="tab">Part of Speech Tags</a></li>
+		<li><a href="#bigrams" role="tab" data-toggle="tab">Bigrams</a></li>
 	</ul>
 
 	<div class="tab-content">
@@ -71,6 +72,17 @@
 					<td>{{ word }}</td>
 					<td>{{ tag }}</td>
 					<td>{{ tag_value }}</td>
+				</tr>
+				{% endfor %}
+			</table>
+		</div>
+
+		<div id="bigrams" class="tab-pane fade">
+			<h3>Bigrams</h3>
+			<table class="table table-hover">
+				{% for bigram in bigrams %}
+				<tr>
+					<td>{{ bigram }}</td>
 				</tr>
 				{% endfor %}
 			</table>
