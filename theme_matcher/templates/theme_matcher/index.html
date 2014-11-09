@@ -1,0 +1,18 @@
+{% load staticfiles %}
+<link rel="stylesheet" type="text/css" href="{% static 'theme_matcher/style.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'theme_matcher/bootstrap.min.css' %}" />
+
+<div id="input-form" class="center">
+	<form action="{% url 'theme_matcher:results' %}" method="post" role="form">
+	{% csrf_token %}
+		<div class="form-group">
+			<label for="theme">Theme</label>
+			<input type="text" name="theme" id="theme" class="form-control" value="agriculture,plant"/>
+		</div>
+		<div class="form-group">
+			<label for="text">Text</label>
+			<textarea name="text" id="text" class="form-control" rows="5" cols="40">Many of the trainings he  attended  in the last  two years  were   on   organic  agriculture, climate  change  and even hydrophonics .  to name  a few are as  follows;    Trainer on Training (TOT )on Organic farming (requested by Albay DTI), Trainer on Training (TOT) on Climate Change, Trainer on Training (TOT) on Organic farming and Organic fertilizers, Training on Vermicomposting, Training on Organic Swine and Poultry, Training on Hydrophonics KSK (Kaisa sa Kasaganaan): vegetables, producing high value commercial crops (December to April)</textarea>
+		</div>
+		<input type="submit" value="Process" class="btn btn-success"/>
+	</form>
+</div>

@@ -1,0 +1,92 @@
+{% load staticfiles %}
+<link rel="stylesheet" type="text/css" href="{% static 'theme_matcher/style.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'theme_matcher/bootstrap.min.css' %}" />
+
+<div id="header">
+
+</div>
+
+<div>
+	<ul id="menu-tabs" class="nav nav-tabs" role="tablist">
+		<li class="active"><a href="#home" role="tab" data-toggle="tab">Home</a></li>
+		<li><a href="#themes" role="tab" data-toggle="tab">Themes</a></li>
+		<li><a href="#tokens" role="tab" data-toggle="tab">Tokens</a></li>
+		<li><a href="#bag-of-words" role="tab" data-toggle="tab">Bag of Words</a></li>
+		<li><a href="#pos-tags" role="tab" data-toggle="tab">Part of Speech Tags</a></li>
+	</ul>
+
+	<div class="tab-content">
+		<div id="home" class="tab-pane fade in active">
+			Home Page
+		</div>
+
+		<div id="themes" class="tab-pane fade">
+			<h3>Themes</h3>
+			<table class="table table-hover">
+				{% for theme in themes %}
+				<tr>
+					<td>{{ theme }}</td>
+				</tr>
+				{% endfor %}
+			</table>
+		</div>
+
+		<div id="tokens" class="tab-pane fade">
+			<h3>Tokens</h3>
+			<table class="table table-hover">
+				{% for token in tokens %}
+				<tr>
+					<td>{{ token }}</td>
+				</tr>
+				{% endfor %}
+			</table>
+		</div>
+
+		<div id="bag-of-words" class="tab-pane fade">
+			<h3>Bag of Words</h3>
+			<table class="table table-hover">
+				<tr>
+					<td>Word</td>
+					<td>Frequency</td>
+				</tr>
+				{% for word, frequency in bag_of_words.items %}
+				<tr>
+					<td>{{ word }}</td>
+					<td>{{ frequency }}</td>
+				</tr>
+				{% endfor %}
+			</table>
+		</div>
+
+		<div id="pos-tags" class="tab-pane fade">
+			<h3>Part of Speech Tags</h3>
+			<table class="table table-hover">
+				<tr>
+					<td>Word</td>
+					<td>Tag</td>
+					<td>Tag Equivalent</td>
+				</tr>
+				{% for word, tag, tag_value in pos_tags %}
+				<tr>
+					<td>{{ word }}</td>
+					<td>{{ tag }}</td>
+					<td>{{ tag_value }}</td>
+				</tr>
+				{% endfor %}
+			</table>
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript" src="{% static 'theme_matcher/jquery-1.9.1.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'theme_matcher/bootstrap.js' %}"></script>
+
+<script>
+  $(function () {
+    $('#menu-tabs a:last').tab('show');
+  })
+</script>
+
+<div id="footer">
+	Sociagraph &copy; 2014
+</div>
