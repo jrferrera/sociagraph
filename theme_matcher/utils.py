@@ -1,5 +1,7 @@
 import re as regex
 import nltk
+from nltk.corpus import PlaintextCorpusReader
+from nltk.corpus import stopwords
 
 # Description: Remove non-letters
 # Parameter/s: string
@@ -12,6 +14,33 @@ def remove_non_letters(word):
 # Return:	   string
 def remove_extra_whitespaces(word):
 	return " ".join(word.split())
+
+# Description: Checks the lexical diversity of the text
+# Parameter/s: string
+# Return:	   float
+def lexical_diversity(text):
+	return len(text) / len(set(text))
+
+# Description: Removes the stopwords in the text
+# Parameter/s: string
+# Return:	   string
+def remove_stopwords(text):
+	stopword_set = set(stopwords.words('english'))
+	return [w for w in text.split(" ") if not w in stopword_set]
+
+# Description: Checks if the word is in the dictionary
+# Parameter/s: string
+# Return:	   boolean
+def in_dictionary(word):
+	return word in nltk.corpus.words.words()
+
+# Description: Gets fractions of the text that are not stopwords
+# Parameter/s: string
+# Return:	   float
+def get_non_stopword_fraction(text):
+	stopword_set = set(stopwords.words('english'))
+	content = [w for w in text.split(" ") if not w in stopword_set]
+	return len(content) / len(text.split(" "))
 
 # Description: Tokenize the text
 # Parameter/s: string
@@ -56,4 +85,19 @@ def get_pos_tag_value(tag):
 def get_pos_tag_values(list):
 	for index, word in enumerate(list):
 		list[index] = list[index] + (get_pos_tag_value(list[index][1]),)
-	return list	
+	return list
+
+# Description: Generate bigrams
+# Parameter/s: string
+# Return:	   list
+def get_bigrams(text):
+	return list(nltk.bigrams(text.split(" ")))
+
+# Description: Read text file
+# Parameter/s: list
+# Return:	   list
+def read_corpus(list):
+	corpus_root = '/usr/share/dict'
+	wordlists = PlaintextCorpusReader(corpus_root, '.*')
+	wordlists.fileids()
+	wordlists.words('connectives')
