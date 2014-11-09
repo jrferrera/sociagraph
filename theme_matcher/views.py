@@ -8,6 +8,7 @@ from theme_matcher.utils import tokenize
 from theme_matcher.utils import get_bag_of_words
 from theme_matcher.utils import get_pos_tags
 from theme_matcher.utils import get_pos_tag_values
+from theme_matcher.utils import get_bigrams
 
 def index(request):
 	template_name = 'theme_matcher/index.html'
@@ -37,10 +38,14 @@ def results(request):
 	pos_tags = get_pos_tags(original_text)
 	pos_tags = get_pos_tag_values(pos_tags)
 
+	# Process bigrams
+	bigrams = get_bigrams(original_text)
+
 	return render(request, template_name, {
 		'themes': themes,
 		'original_text': original_text,
 		'tokens': tokens,
 		'bag_of_words': bag_of_words,
 		'pos_tags': pos_tags,
+		'bigrams': bigrams,
 		})
