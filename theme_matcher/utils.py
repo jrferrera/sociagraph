@@ -2,6 +2,7 @@ import re as regex
 import nltk
 from nltk.corpus import PlaintextCorpusReader
 from nltk.corpus import stopwords
+from nltk.corpus import wordnet
 
 # Description: Remove non-letters
 # Parameter/s: string
@@ -92,6 +93,21 @@ def get_pos_tag_values(list):
 # Return:	   list
 def get_bigrams(text):
 	return list(nltk.bigrams(text.split(" ")))
+
+# Description: Get the frequency distribution
+# Parameter/s: tuple
+# Return:	   tuple
+def get_frequency_distribution(genre_word):
+	return nltk.ConditionalFreqDist(genre_word)
+
+# Description: Get the synonyms
+# Parameter/s: word
+# Return:	   list
+def get_synonyms(word):
+	synonyms = []
+	for synset in wn.synsets(word):
+		synonyms.append(synset)
+	return synonyms
 
 # Description: Read text file
 # Parameter/s: list
