@@ -3,6 +3,7 @@ import nltk
 from nltk.corpus import PlaintextCorpusReader
 from nltk.corpus import stopwords
 from nltk.corpus import wordnet
+from random import shuffle
 
 # Description: Remove non-letters
 # Parameter/s: string
@@ -27,7 +28,7 @@ def lexical_diversity(text):
 # Return:	   string
 def remove_stopwords(text):
 	stopword_set = set(stopwords.words('english'))
-	return [w for w in text.split(" ") if not w in stopword_set]
+	return " ".join([w for w in text.split(" ") if not w in stopword_set])
 
 # Description: Checks if the word is in the dictionary
 # Parameter/s: string
@@ -62,6 +63,13 @@ def get_bag_of_words(text):
 		bag_of_words[word] = text.count(word)
 
 	return bag_of_words
+
+# Description: Determine part of speech of a word
+# Parameter/s: string
+# Return:	   string
+def get_pos_tag(text):
+	text = regex.sub('[^A-Za-z ]+', ' ', text)
+	return nltk.pos_tag(text)
 
 # Description: Determine part of speech of each word
 # Parameter/s: string
@@ -100,14 +108,65 @@ def get_bigrams(text):
 def get_frequency_distribution(genre_word):
 	return nltk.ConditionalFreqDist(genre_word)
 
+# Description: Get the definition/s of the word
+# Parameter/s: string
+# Return:	   list
+def get_word_definitions(word):
+	definitions = []
+	for synset in wordnet.synsets(word):
+		definitions.append(synset.definition())
+	return definitions
+
 # Description: Get the synonyms
-# Parameter/s: word
+# Parameter/s: string
 # Return:	   list
 def get_synonyms(word):
 	synonyms = []
-	for synset in wn.synsets(word):
-		synonyms.append(synset)
+	for synset in wordnet.synsets(word):
+		synonyms.append(synset.name())
 	return synonyms
+
+# Description: Check if two words has similar synonyms
+# Parameter/s: string | string
+# Return:	   boolean
+def has_similar_synonyms(word1, word2):
+	set1 = set(wordnet.synsets(word1))
+	set2 = set(wordnet.synsets(word2))
+
+	return not set1.isdisjoint(set2)
+
+# Description: Get the initial classifications of each word
+# Parameter/s: list
+# Return:	   tuple
+def get_initial_classifications(themes, wordlist):
+	classified_wordlist = {}
+
+	for theme in themes:
+		for word in wordlist:
+			if has_similar_synonyms(theme, word):
+				classified_wordlist[word] = theme
+
+	return classified_wordlist
+
+# Description: Builds feature set
+# Parameter/s: list | list
+# Return:	   list
+def build_feature_sets(themes, wordlist, classified_wordlist):
+	feature_sets = []
+	features = {}
+
+	for word in wordlist:
+		if classified_wordlist.has_key(word):
+			features['contains(%s)' % word] = True
+			feature_sets.append((features, themes.index(classified_wordlist[word])))
+
+	return feature_sets
+
+# Description: Randomize position of list items
+# Parameter/s: list
+# Return:	   list
+def shuffle_set(list):
+	return shuffle(list)
 
 # Description: Read text file
 # Parameter/s: list
