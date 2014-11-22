@@ -37,6 +37,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'theme_matcher',
+    'sentiment_analyzer',
 )
 
 MIDDLEWARE_CLASSES = (
