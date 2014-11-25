@@ -4,12 +4,33 @@ from nltk.corpus import PlaintextCorpusReader
 from nltk.corpus import stopwords
 from nltk.corpus import wordnet
 from random import shuffle
+from sklearn.svm import LinearSVC
+from nltk.classify.scikitlearn import SklearnClassifier
+from sklearn.metrics import classification_report
+
+# Description: Get the total number of words
+# Parameter/s: string
+# Return:	   string
+def count_words(text):
+	return len(text.split(' '))
+
+# Description: Transform string to Text
+# Parameter/s: string
+# Return:	   Text
+def transform_to_text(text):
+	return nltk.Text(text)
 
 # Description: Remove non-letters
 # Parameter/s: string
 # Return:	   string
 def remove_non_letters(word):
 	return regex.sub('[^A-Za-z ]+', ' ', word)
+
+# Description: Remove non-alphanumeric or non-hyphen, 
+# Parameter/s: string
+# Return:	   string
+def remove_non_alphanumeric(word):
+	return regex.sub('[^A-Za-z0-9\- ]+', ' ', word)
 
 # Description: Remove extra whitespaces and tabs
 # Parameter/s: string
@@ -48,8 +69,8 @@ def get_non_stopword_fraction(text):
 # Parameter/s: string
 # Return:	   tuple
 def tokenize(text):
-	text = regex.sub('[^A-Za-z ]+', ' ', text)
-	return nltk.word_tokenize(text)
+	text = regex.sub('[^A-Za-z\- ]+', ' ', text)
+	return nltk.word_tokenize(unicode_to_string(text))
 
 # Description: Count the frequeny of each word
 # Parameter/s: string
@@ -100,7 +121,7 @@ def get_pos_tag_values(list):
 # Parameter/s: string
 # Return:	   list
 def get_bigrams(text):
-	return list(nltk.bigrams(text.split(" ")))
+	return list(nltk.bigrams(unicode_to_string(text).split(" ")))
 
 # Description: Get the frequency distribution
 # Parameter/s: tuple
@@ -123,7 +144,7 @@ def get_word_definitions(word):
 def get_synonyms(word):
 	synonyms = []
 	for synset in wordnet.synsets(word):
-		synonyms.append(synset.name())
+		synonyms.append(unicode_to_string(synset.name().split('.')[0]))
 	return synonyms
 
 # Description: Check if two words has similar synonyms
@@ -176,3 +197,105 @@ def read_corpus(list):
 	wordlists = PlaintextCorpusReader(corpus_root, '.*')
 	wordlists.fileids()
 	wordlists.words('connectives')
+
+# Description: Create an SVM classifier
+# Parameter/s: None
+# Return:	   SklearnClassifier(LinerarSVC())
+def create_svm_classifier():
+	# from sklearn.feature_extraction.text import TfidfTransformer
+	# from sklearn.feature_selection import SelectKBest, chi2
+	# from sklearn.naive_bayes import MultinomialNB
+	# from sklearn.pipeline import Pipeline
+	# pipeline = Pipeline([('tfidf', TfidfTransformer()),
+	# 	('chi2', SelectKBest(chi2, k='all')),
+	# 	('svm', LinearSVC())])
+	return SklearnClassifier(LinearSVC())
+
+# Description: Train the classifier
+# Parameter/s: classifier | list
+# Return:	   classifier
+def train_classifier(classifier, training_data):
+	classifier.train(training_data)
+
+	return classifier
+
+# Description: Get the classification report
+# Parameter/s: list | list | list
+# Return:	   classifier
+def get_classification_report(test_classification_index, classification_result, themes):
+	report = classification_report(test_classification_index, classification_result, labels=list(set(test_classification_index)),target_names=themes)
+
+	return report
+
+# Description: Convert unicode to string
+# Parameter/s: unicode string
+# Return:	   string
+def unicode_to_string(unicode_string):
+	return unicode_string.encode('ascii', 'ignore')
+
+# Description:  Breaks the paragraph into sentences through period (.)
+# Parameter/s:  string
+# Return:	    list []
+# Dependencies: unicode_to_string() |
+def paragraph_to_sentences(paragraph):
+	# Replace all occurences of period(.) with a single period(.)
+	new_paragraph = regex.sub('[.]+', '.', paragraph)
+
+	# Removes unicode
+	new_paragraph = unicode_to_string(new_paragraph)
+
+	# Breaks the paragraph to sentences
+	return new_paragraph.split('.')
+
+
+# Description:  Check if the word1 is a synonym of word2
+# Parameter/s:  string | string
+# Return:	    boolean
+def is_synonymous(word1, word2):
+	word1_synset = wordnet.synsets(word1)
+	word2_synset = wordnet.synsets(word2)
+
+	# Check for any similar synonyms
+	for synset in word1_synset:
+		if synset in word2_synset:
+			return True
+
+	return False
+
+
+# Description:  Check if the sentence is associated to a label
+# Parameter/s:  str | str
+# Return:	    dict { word: word_count }
+# Dependencies: is_synonymous()
+def get_label_associated_words(label, sentence):
+	# Remove non-alphanumeric, non-hyphen and non-space
+	filtered_sentence = regex.sub('[^A-Za-z0-9\- ]+', '', sentence)
+
+	words = filtered_sentence.split(' ')
+
+	associated_words = { }
+			
+	for word in words:
+		if is_synonymous(word.lower(), label):
+			if word not in associated_words:
+				associated_words[word] = words.count(word)
+
+	return associated_words
+
+# Description:  Breaks the paragraph into sentences through period (.)
+# Parameter/s:  str
+# Return:	    list [ (label, sentence, { word: word_count } ), ... ]
+# Dependencies: get_label_associated_words()
+def get_initial_sentence_classification(labels, sentence_list):
+	classified_sentences = []
+
+	for label in labels:
+		associated_words = {}
+
+		for sentence in sentence_list:
+			associated_words = get_label_associated_words(label, sentence)
+
+			if len(associated_words) > 0:
+				classified_sentences.append((sentence, label, associated_words))
+
+	return classified_sentences
