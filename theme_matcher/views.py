@@ -1,35 +1,16 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-
+from sociagraph.models import Classified_Corpus
+from django.db.models import Q
 # Import utilities in utils.py
-import nltk
-from sociagraph.utils import remove_non_letters
-from sociagraph.utils import remove_extra_whitespaces
-from sociagraph.utils import remove_stopwords
-from sociagraph.utils import tokenize
-from sociagraph.utils import get_bag_of_words
-from sociagraph.utils import get_pos_tags
-from sociagraph.utils import get_pos_tag_values
-from sociagraph.utils import get_bigrams
-from sociagraph.utils import in_dictionary
-from sociagraph.utils import get_synonyms
-from sociagraph.utils import get_word_definitions
-from sociagraph.utils import get_pos_tag
-from sociagraph.utils import get_pos_tag_value
-from sociagraph.utils import get_initial_classifications
-from sociagraph.utils import build_feature_sets
-from sociagraph.utils import has_similar_synonyms
-from sociagraph.utils import shuffle_set
-from sociagraph.utils import create_svm_classifier
-from sociagraph.utils import train_classifier
-from sociagraph.utils import get_classification_report
-from sociagraph.utils import unicode_to_string
 from sociagraph.utils import *
 
 def index(request):
 	template_name = 'theme_matcher/index.html'
 
-	return render(request, template_name)
+	classified_corpus = Classified_Corpus.objects.all()
+
+	return render(request, template_name, { 'classified_corpus': classified_corpus })
 
 def results(request):
 	template_name = 'theme_matcher/results.html'
@@ -62,40 +43,46 @@ def results(request):
 	# Process bigrams
 	bigrams = get_bigrams(original_text)
 
-	# ========================================
-	# Get from database
-	initial_training_data = [
-					("It  was in 1999 when Mr. Aquino was introduced to Organic  Agriculture while he was  still  with the military as a  soldier (sundalo )", "agriculture"),
-					("It  was in 1999 when Mr. Aquino was introduced to Organic  Agriculture while he was  still  with the military as a  soldier (sundalo )", "organic"),
-					("It  was in 1999 when Mr. Aquino was introduced to Organic  Agriculture while he was  still  with the military as a  soldier (sundalo )", "military"),
-					("It  was in 1999 when Mr. Aquino was introduced to Organic  Agriculture while he was  still  with the military as a  soldier (sundalo )", "person"),
-					("He  is proud to  serve the  country  as a military soldier  for   26 years and  9 months .  Although he  finished  BA political Science , he  was  interested  in farming . As a   soldier , he   farm  for pleasure.", "military"),
-					("He  is proud to  serve the  country  as a military soldier  for   26 years and  9 months .  Although he  finished  BA political Science , he  was  interested  in farming . As a   soldier , he   farm  for pleasure.", "education"),
-					("He  is proud to  serve the  country  as a military soldier  for   26 years and  9 months .  Although he  finished  BA political Science , he  was  interested  in farming . As a   soldier , he   farm  for pleasure.", "agriculture"),
+	labeled_text = {}
+	for theme in themes:
+		not_theme = 'not_' + theme
+		# Get text with matching theme from database
+		labeled_corpora = Classified_Corpus.objects.filter(theme__contains=theme).values('text')
+		
+		# Get text not matching the theme from database
+		opposite_labeled_corpora = Classified_Corpus.objects.filter(~Q(theme__contains=theme)).values('text')[:labeled_corpora.count()]
 
-				   ]
-	# ========================================
-	sentence_list = paragraph_to_sentences(original_text)
-	classified_sentences = get_initial_sentence_classification(themes, sentence_list)
+		labeled_text[theme] = []
+		labeled_text[not_theme] = []
+		
+		for corpus in labeled_corpora:
+			labeled_text[theme].append((unicode_to_string(corpus['text']), theme))
+		
+		for corpus in opposite_labeled_corpora:
+			labeled_text[not_theme].append((unicode_to_string(corpus['text']), not_theme))
 
-	# Append the initial sentence classification to initial training data
-	for classified_sentence in classified_sentences:
-		# Append the sentence and label
-		initial_training_data.append((classified_sentence[0], classified_sentence[1]))
+		combined_labeled_text = labeled_text[theme] + labeled_text[not_theme]
+		
+		shuffle_set(combined_labeled_text)
+		
+		feature_set_words = get_feature_set_words(combined_labeled_text)
 
-	# Get training data vocabulary
-	training_data_words = set(word.lower() for information in initial_training_data for word in tokenize(information[0]))
+		# Check if the words in a paragraph is in feature set words
+		feature_sets = [ ({ word: (word in tokenize(item[0])) for word in feature_set_words }, item[1]) for item in combined_labeled_text ]
 
-	training_data = [ ({ word: (word.lower() in tokenize(information[0])) for word in training_data_words }, information[1]) for information in initial_training_data ]
+		set_size = len(feature_sets)/2
+		test_set = feature_sets[:set_size]
+		train_set = feature_sets[set_size:]
 
-	svm_classifier = create_svm_classifier()
-	svm_classifier = train_classifier(svm_classifier, training_data)
+		svm_classifier = create_svm_classifier()
+		svm_classifier = train_classifier(svm_classifier, train_set)
 
-	test_sent_features = {word.lower(): (word in tokenize(original_text.lower())) for word in training_data_words}
+		# test_sentence = "He   adheres to the fact  that there are  several opportunities for  organic   farming .   It  can be a 'profitable  business'. Example, one can  engage in producing . organic fertilizers, organic sprays,  vermi,  and  vermicast.  The  marketing of  organic products is   a good  business  as well. Moreover  OA is  sustainable  according  to him  because  it  is  pro- environmental and  brings back  the microorganism  to the soil  that  enhances  biodiversity.  The  private  sector  according to him can also  help  sustain the promotion of OA ."
+		test_sentence = "Focus Group Discussion (FGD) and Key Informant Interview (KII) are two important qualitative research methods. Focus Group Discussion is used to collect information from different sectors concerned in the research topic gathered in a meeting. It is a small group of six (6) to ten (10) people led through an open discussion by a skilled moderator. The group needs to be large enough to generate rich discussion but not so large that some participants are left out. It is structured around a set of carefully predetermined questions but the discussion is free-flowing where the participant comments will stimulate and influence the thinking and sharing of others. Some people even find themselves changing their thoughts and opinions during the group (Eliot and Associates, 2005). The responses will be synthesized to obtain a general idea of how these sectors perceive the issues involved in the research"
+		classification_test = {word: (word in tokenize(test_sentence)) for word in feature_set_words }
+		test = svm_classifier.classify(classification_test)
+		# test = test
 
-	test = svm_classifier.classify(test_sent_features)
-	# test = training_data
-	
 	return render(request, template_name, {
 		'themes': themes,
 		'original_text': original_text,
@@ -103,8 +90,6 @@ def results(request):
 		'bag_of_words': bag_of_words,
 		'pos_tags': pos_tags,
 		'bigrams': bigrams,
-		'sentence_list': sentence_list,
-		'classified_sentences': classified_sentences,
 		'test': test,
 		# 'feature_sets': feature_sets,
 		# 'testing_data': testing_data,
@@ -112,3 +97,12 @@ def results(request):
 		# 'classification_result': classification_result,
 		# 'classification_report': classification_report,
 		})
+
+def upload_corpus(request):
+	template_name = 'theme_matcher/index.html'
+
+	filename = request.POST.get('corpus_file')
+	source_file = open(filename, 'r')
+	source_file.readline()
+	source_file.close()
+	return render(request, template_name, { 'filename': filename })

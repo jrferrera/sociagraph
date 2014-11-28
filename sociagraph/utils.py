@@ -69,7 +69,7 @@ def get_non_stopword_fraction(text):
 # Parameter/s: string
 # Return:	   tuple
 def tokenize(text):
-	text = regex.sub('[^A-Za-z\- ]+', ' ', text)
+	text = regex.sub('[^A-Za-z0-9\- ]+', '', text)
 	return nltk.word_tokenize(unicode_to_string(text))
 
 # Description: Count the frequeny of each word
@@ -187,7 +187,7 @@ def build_feature_sets(themes, wordlist, classified_wordlist):
 # Parameter/s: list
 # Return:	   list
 def shuffle_set(list):
-	return shuffle(list)
+	shuffle(list)
 
 # Description: Read text file
 # Parameter/s: list
@@ -299,3 +299,15 @@ def get_initial_sentence_classification(labels, sentence_list):
 				classified_sentences.append((sentence, label, associated_words))
 
 	return classified_sentences
+
+# Description:  Get the feature set words
+# Parameter/s:  list [ (sentence, label), ... ]
+# Return:	    list [ word, ... ]
+def get_feature_set_words(labeled_paragraph_list):
+	feature_set_words = []
+	
+	for labeled_paragraph in labeled_paragraph_list:
+		for word in tokenize(labeled_paragraph[0]):
+			feature_set_words.append(word)
+
+	return set(feature_set_words)
