@@ -135,7 +135,7 @@ def get_frequency_distribution(genre_word):
 def get_word_definitions(word):
 	definitions = []
 	for synset in wordnet.synsets(word):
-		definitions.append(synset.definition())
+		definitions.append(unicode_to_string(synset.definition()))
 	return definitions
 
 # Description: Get the synonyms
@@ -311,3 +311,24 @@ def get_feature_set_words(labeled_paragraph_list):
 			feature_set_words.append(word)
 
 	return set(feature_set_words)
+
+# Description:  Assigns theme
+# Parameter/s:  list [ item, item ] | str
+# Return:	    list [ (word, theme) ]
+# Dependencies:	unicode_to_string()
+def assign_theme(labeled_corpora, theme):
+	labeled_text = []
+	
+	for corpus in labeled_corpora:
+		labeled_text.append((unicode_to_string(corpus['text']), theme))
+
+	return labeled_text
+
+# Description:  Get the feature sets
+# Parameter/s:  [ (word, theme) ... ] | [ word, ... ] | str
+# Return:	    list [({ contains(word): True, is_synonymous(word): True })]
+# Dependencies: tokenize()
+def get_feature_sets(combined_labeled_text, feature_set_words, theme):
+	feature_sets = [ ({ word: (word in tokenize(item[0])) for word in feature_set_words }, item[1]) for item in combined_labeled_text ]
+	
+	return feature_sets
