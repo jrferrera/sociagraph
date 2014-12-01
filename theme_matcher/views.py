@@ -88,15 +88,14 @@ def results(request):
 		test_set_features = []
 		test_set_correct_classifications = []
 
+		# Get the test features and labels for metrics
 		for features, labels in test_set:
 			test_set_features.append(features)
 			test_set_correct_classifications.append(labels)
 
 		test_data_classification = svm_classifier.classify_many(test_set_features)
-		accuracy_score = get_accuracy_score(test_set_correct_classifications, test_data_classification)
-		
-		# test_paragraph = "He   adheres to the fact  that there are  several opportunities for  organic   farming .   It  can be a 'profitable  business'. Example, one can  engage in producing . organic fertilizers, organic sprays,  vermi,  and  vermicast.  The  marketing of  organic products is   a good  business  as well. Moreover  OA is  sustainable  according  to him  because  it  is  pro- environmental and  brings back  the microorganism  to the soil  that  enhances  biodiversity.  The  private  sector  according to him can also  help  sustain the promotion of OA ."
-		# test_paragraph = "Focus Group Discussion (FGD) and Key Informant Interview (KII) are two important qualitative research methods. Focus Group Discussion is used to collect information from different sectors concerned in the research topic gathered in a meeting. It is a small group of six (6) to ten (10) people led through an open discussion by a skilled moderator. The group needs to be large enough to generate rich discussion but not so large that some participants are left out. It is structured around a set of carefully predetermined questions but the discussion is free-flowing where the participant comments will stimulate and influence the thinking and sharing of others. Some people even find themselves changing their thoughts and opinions during the group (Eliot and Associates, 2005). The responses will be synthesized to obtain a general idea of how these sectors perceive the issues involved in the research. This is an agriculture sector."
+		# accuracy_score = get_accuracy_score(test_set_correct_classifications, test_data_classification)
+		classification_report = get_classification_report(test_set_correct_classifications, test_set_features, theme)
 
 		classified_sentences = {}
 		keywords = []
@@ -105,7 +104,6 @@ def results(request):
 			classification_test = {word: (word in tokenize(sentence)) for word in feature_set_words }
 
 			# Get each theme classification per sentence
-			# classified_sentences[sentence] = svm_classifier.classify(classification_test)
 			classified_sentences[sentence] = svm_classifier.classify(classification_test)
 
 			# Get keywords from sentences matching the theme
@@ -115,7 +113,7 @@ def results(request):
 		theme_classification_results[theme] = {}
 		theme_classification_results[theme] = classified_sentences
 
-		test = accuracy_score
+		test = classification_report
 
 	return render(request, template_name, {
 		'themes': themes,

@@ -8,6 +8,7 @@ from sklearn.svm import LinearSVC
 from sklearn.svm import SVC
 from nltk.classify.scikitlearn import SklearnClassifier
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import classification_report
 
 # Description: Get the total number of words
 # Parameter/s: string
@@ -329,7 +330,15 @@ def get_feature_sets(combined_labeled_text, feature_set_words, theme):
 	return feature_sets
 
 # Description:  Get the accuracy score
-# Parameter/s:  list [ str, ... ]
+# Parameter/s:  list [ str, ... ] | list [ str, ... ] 
 # Return:	    float
 def get_accuracy_score(correct_labels, test_labels):
 	return accuracy_score(correct_labels, test_labels)
+
+# Description:  Get the accuracy, precision, f1 and recall score
+# Parameter/s:  list [ str, ... ] | list [ str, ... ]
+# Return:	    str
+def get_classification_report(correct_labels, test_labels, theme):
+	not_theme = 'not_' + theme
+	target_names = [theme, not_theme]
+	return classification_report(correct_labels, test_labels, target_names=target_names)
