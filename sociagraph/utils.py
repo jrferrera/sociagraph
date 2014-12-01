@@ -5,8 +5,9 @@ from nltk.corpus import stopwords
 from nltk.corpus import wordnet
 from random import shuffle
 from sklearn.svm import LinearSVC
+from sklearn.svm import SVC
 from nltk.classify.scikitlearn import SklearnClassifier
-from sklearn.metrics import classification_report
+from sklearn.metrics import accuracy_score
 
 # Description: Get the total number of words
 # Parameter/s: string
@@ -200,15 +201,9 @@ def read_corpus(list):
 
 # Description: Create an SVM classifier
 # Parameter/s: None
-# Return:	   SklearnClassifier(LinerarSVC())
+# Return:	   SklearnClassifier(LinearSVC())
 def create_svm_classifier():
-	# from sklearn.feature_extraction.text import TfidfTransformer
-	# from sklearn.feature_selection import SelectKBest, chi2
-	# from sklearn.naive_bayes import MultinomialNB
-	# from sklearn.pipeline import Pipeline
-	# pipeline = Pipeline([('tfidf', TfidfTransformer()),
-	# 	('chi2', SelectKBest(chi2, k='all')),
-	# 	('svm', LinearSVC())])
+	# return SklearnClassifier(SVC(probability = True))
 	return SklearnClassifier(LinearSVC())
 
 # Description: Train the classifier
@@ -332,3 +327,9 @@ def get_feature_sets(combined_labeled_text, feature_set_words, theme):
 	feature_sets = [ ({ word: (word in tokenize(item[0])) for word in feature_set_words }, item[1]) for item in combined_labeled_text ]
 	
 	return feature_sets
+
+# Description:  Get the accuracy score
+# Parameter/s:  list [ str, ... ]
+# Return:	    float
+def get_accuracy_score(correct_labels, test_labels):
+	return accuracy_score(correct_labels, test_labels)

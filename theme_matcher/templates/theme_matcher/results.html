@@ -9,6 +9,7 @@
 		<li><a href="#bag-of-words" role="tab" data-toggle="tab">Bag of Words</a></li>
 		<li><a href="#pos-tags" role="tab" data-toggle="tab">Part of Speech Tags</a></li>
 		<li><a href="#bigrams" role="tab" data-toggle="tab">Bigrams</a></li>
+		<li><a href="#classification-results" role="tab" data-toggle="tab">Classification Results</a></li>
 	</ul>
 
 	<div class="tab-content">
@@ -103,6 +104,24 @@
 				<tr>
 					<td>{{ bigram }}</td>
 				</tr>
+				{% endfor %}
+			</table>
+		</div>
+
+		<div id="classification-results" class="tab-pane fade">
+			<h3>Classification Results</h3>
+			<table class="table table-hover">
+				<tr>
+					<td>Sentence</td>
+					<td>Label</td>
+				</tr>
+				{% for theme, per_sentence in theme_classification_results.items %}
+					{% for sentence, label in per_sentence.items %}
+						<tr>
+							<td>{{ sentence }}</td>
+							<td>{{ label }}</td>
+						</tr>
+					{% endfor %}
 				{% endfor %}
 			</table>
 		</div>
