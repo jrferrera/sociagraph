@@ -4,37 +4,19 @@
 	<ul id="menu-tabs" class="nav nav-tabs" role="tablist">
 		<li class="active"><a href="#home" role="tab" data-toggle="tab">Home</a></li>
 		<li><a href="#inputs" role="tab" data-toggle="tab">Inputs</a></li>
-		<li><a href="#theme-data" role="tab" data-toggle="tab">Theme Data</a></li>
 		<li><a href="#tokens" role="tab" data-toggle="tab">Tokens</a></li>
 		<li><a href="#bag-of-words" role="tab" data-toggle="tab">Bag of Words</a></li>
 		<li><a href="#pos-tags" role="tab" data-toggle="tab">Part of Speech Tags</a></li>
-		<li><a href="#bigrams" role="tab" data-toggle="tab">Bigrams</a></li>
 		<li><a href="#classification-results" role="tab" data-toggle="tab">Classification Results</a></li>
+		<li><a href="#classification-statistics" role="tab" data-toggle="tab">Classification Statistics</a></li>
 	</ul>
 
 	<div class="tab-content">
 		<div id="home" class="tab-pane fade in active">
-			
 			<div>{{ test }}</div>
-			
 		</div>
 
 		<div id="inputs" class="tab-pane fade">
-			<h3>Themes</h3>
-			<table class="table table-hover">
-				{% for theme in themes %}
-				<tr>
-					<td>{{ theme }}</td>
-				</tr>
-				{% endfor %}
-			</table>
-			<h3>Text</h3>
-			<div>
-				{{ original_text }}
-			</div>
-		</div>
-
-		<div id="theme-data" class="tab-pane fade">
 			<h3>Theme Data</h3>
 			{% for theme, definitions in theme_definitions %}
 			<p>
@@ -97,17 +79,6 @@
 			</table>
 		</div>
 
-		<div id="bigrams" class="tab-pane fade">
-			<h3>Bigrams</h3>
-			<table class="table table-hover">
-				{% for bigram in bigrams %}
-				<tr>
-					<td>{{ bigram }}</td>
-				</tr>
-				{% endfor %}
-			</table>
-		</div>
-
 		<div id="classification-results" class="tab-pane fade">
 			<h3>Classification Results</h3>
 			<table class="table table-hover">
@@ -124,6 +95,21 @@
 					{% endfor %}
 				{% endfor %}
 			</table>
+		</div>
+
+		<div id="classification-statistics" class="tab-pane fade">
+			<h3>Classification Statistics</h3>
+			{% for theme, scores in theme_classification_statistics.items %}
+				<h4>{{ theme }}</h4>
+				<table class="table table-hover">
+					{% for category, score in scores.items %}
+						<tr>
+							<td>{{ category.title }}</td>
+							<td>{{ score }}</td>
+						</tr>
+					{% endfor %}
+				</table>
+			{% endfor %}
 		</div>
 	</div>
 </div>

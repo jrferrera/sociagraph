@@ -11,3 +11,7 @@ class Part_of_Speech(models.Model):
 class Classified_Corpus(models.Model):
 	text = models.TextField()
 	theme = models.TextField()
+
+class Sentiment_Corpus(models.Model):
+	text = models.TextField()
+	emotion = models.TextField()

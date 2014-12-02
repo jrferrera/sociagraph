@@ -1,9 +1,11 @@
+import re
 from django.shortcuts import render
 from django.http import HttpResponse
 from sociagraph.models import Classified_Corpus
 from django.db.models import Q
 # Import utilities in utils.py
 from sociagraph.utils import *
+
 
 def index(request):
 	template_name = 'theme_matcher/index.html'
@@ -41,11 +43,9 @@ def results(request):
 	pos_tags = get_pos_tags(original_text)
 	pos_tags = get_pos_tag_values(pos_tags)
 
-	# Process bigrams
-	bigrams = get_bigrams(original_text)
-
 	# Contains all resulting data
 	theme_classification_results = {}
+	theme_classification_statistics = {}
 	theme_definitions = []
 
 	for theme in themes:
@@ -58,7 +58,7 @@ def results(request):
 		labeled_corpora = Classified_Corpus.objects.filter(theme__contains=theme).values('text')
 		
 		# Get text not matching the theme from database
-		opposite_labeled_corpora = Classified_Corpus.objects.filter(~Q(theme__contains=theme)).values('text')[:labeled_corpora.count()]
+		opposite_labeled_corpora = Classified_Corpus.objects.filter(~Q(theme__contains=theme)).values('text').order_by('?')[:labeled_corpora.count()]
 
 		# Assign each result to given theme
 		labeled_text[theme] = assign_theme(labeled_corpora, theme)
@@ -76,7 +76,7 @@ def results(request):
 		feature_set_words = get_feature_set_words(combined_labeled_text)
 
 		# Check if the words in a paragraph is in feature set words
-		feature_sets = get_feature_sets(combined_labeled_text, feature_set_words, theme)
+		feature_sets = get_feature_sets(combined_labeled_text, feature_set_words)
 
 		set_size = len(feature_sets)/2
 		test_set = feature_sets[:set_size]
@@ -87,15 +87,15 @@ def results(request):
 
 		test_set_features = []
 		test_set_correct_classifications = []
+		classification_scores = {}
 
 		# Get the test features and labels for metrics
 		for features, labels in test_set:
 			test_set_features.append(features)
 			test_set_correct_classifications.append(labels)
 
-		test_data_classification = svm_classifier.classify_many(test_set_features)
-		# accuracy_score = get_accuracy_score(test_set_correct_classifications, test_data_classification)
-		classification_report = get_classification_report(test_set_correct_classifications, test_set_features, theme)
+		test_set_reclassification = svm_classifier.classify_many(test_set_features)
+		classification_scores = get_classification_scores(test_set_correct_classifications, test_set_reclassification, [theme, not_theme])
 
 		classified_sentences = {}
 		keywords = []
@@ -111,9 +111,11 @@ def results(request):
 			# 	classified_sentences[sentence]["keywords"] = get_keywords(sentence, theme)
 
 		theme_classification_results[theme] = {}
+		theme_classification_statistics[theme] = {}
 		theme_classification_results[theme] = classified_sentences
+		theme_classification_statistics[theme] = classification_scores
 
-		test = classification_report
+		test = theme_classification_statistics
 
 	return render(request, template_name, {
 		'themes': themes,
@@ -124,11 +126,8 @@ def results(request):
 		'pos_tags': pos_tags,
 		'bigrams': bigrams,
 		'theme_classification_results': theme_classification_results,
+		'theme_classification_statistics': theme_classification_statistics,
 		'test': test,
-		# 'testing_data': testing_data,
-		# 'training_data': training_data,
-		# 'classification_result': classification_result,
-		# 'classification_report': classification_report,
 		})
 
 def upload_corpus(request):

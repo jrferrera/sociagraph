@@ -8,7 +8,11 @@ from sklearn.svm import LinearSVC
 from sklearn.svm import SVC
 from nltk.classify.scikitlearn import SklearnClassifier
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
+from sklearn.metrics import f1_score
 from sklearn.metrics import classification_report
+
 
 # Description: Get the total number of words
 # Parameter/s: string
@@ -218,10 +222,10 @@ def train_classifier(classifier, training_data):
 # Description: Get the classification report
 # Parameter/s: list | list | list
 # Return:	   classifier
-def get_classification_report(test_classification_index, classification_result, themes):
-	report = classification_report(test_classification_index, classification_result, labels=list(set(test_classification_index)),target_names=themes)
+# def get_classification_report(test_classification_index, classification_result, themes):
+# 	report = classification_report(test_classification_index, classification_result, labels=list(set(test_classification_index)),target_names=themes)
 
-	return report
+# 	return report
 
 # Description: Convert unicode to string
 # Parameter/s: unicode string
@@ -324,7 +328,7 @@ def assign_theme(labeled_corpora, theme):
 # Parameter/s:  [ (word, theme) ... ] | [ word, ... ] | str
 # Return:	    list [({ contains(word): True, is_synonymous(word): True })]
 # Dependencies: tokenize()
-def get_feature_sets(combined_labeled_text, feature_set_words, theme):
+def get_feature_sets(combined_labeled_text, feature_set_words):
 	feature_sets = [ ({ word: (word in tokenize(item[0])) for word in feature_set_words }, item[1]) for item in combined_labeled_text ]
 	
 	return feature_sets
@@ -335,6 +339,42 @@ def get_feature_sets(combined_labeled_text, feature_set_words, theme):
 def get_accuracy_score(correct_labels, test_labels):
 	return accuracy_score(correct_labels, test_labels)
 
+# Description:  Get the precision score
+# Parameter/s:  list [ str, ... ] | list [ str, ... ] 
+# Return:	    float
+def get_precision_score(correct_labels, test_labels):
+	return precision_score(correct_labels, test_labels, labels=None)
+
+# Description:  Get the recall score
+# Parameter/s:  list [ str, ... ] | list [ str, ... ] 
+# Return:	    float
+def get_recall_score(correct_labels, test_labels):
+	return recall_score(correct_labels, test_labels, labels=None)
+
+# Description:  Get the f1 score
+# Parameter/s:  list [ str, ... ] | list [ str, ... ] 
+# Return:	    float
+def get_f_measure_score(correct_labels, test_labels):
+	return f1_score(correct_labels, test_labels, labels=None)
+
+# Description:  Get the accuracy, precision, recall and f-measure
+# Parameter/s:  list [ str, ... ] | list [ str, ... ]  | list [ str, ... ]
+# Return:	    dict ( { 'str': float } )
+def get_classification_scores(correct_labels, test_labels, labels):
+	classification_scores = {}
+
+	true_values = [ labels.index(label) for label in correct_labels ]
+	predicted_values = [ labels.index(label) for label in test_labels ]
+
+	classification_scores = {
+		'accuracy': accuracy_score(correct_labels, test_labels),
+		'precision': precision_score(true_values, predicted_values),
+		'recall': recall_score(true_values, predicted_values),
+		'f-measure': f1_score(true_values, predicted_values),
+	}
+
+	return classification_scores
+
 # Description:  Get the accuracy, precision, f1 and recall score
 # Parameter/s:  list [ str, ... ] | list [ str, ... ]
 # Return:	    str
@@ -342,3 +382,4 @@ def get_classification_report(correct_labels, test_labels, theme):
 	not_theme = 'not_' + theme
 	target_names = [theme, not_theme]
 	return classification_report(correct_labels, test_labels, target_names=target_names)
+

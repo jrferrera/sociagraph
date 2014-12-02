@@ -1,16 +1,47 @@
-{% load staticfiles %}
-<link rel="stylesheet" type="text/css" href="{% static 'sentiment_analyzer/style.css' %}" />
-<link rel="stylesheet" type="text/css" href="{% static 'sentiment_analyzer/bootstrap.min.css' %}" />
+{% include 'includes/header.html' %}
 
-<div id="input-form" class="center">
-	<form action="{% url 'sentiment_analyzer:results' %}" method="post" role="form">
-	{% csrf_token %}
-		<div class="form-group">
-			<label for="text">Text</label>
-			<textarea name="text" id="text" class="form-control" rows="5" cols="40">Many of the trainings he  attended  in the last  two years  were   on   organic  agriculture, climate  change  and even hydrophonics .  to name  a few are as  follows;    Trainer on Training (TOT )on Organic farming (requested by Albay DTI), Trainer on Training (TOT) on Climate Change, Trainer on Training (TOT) on Organic farming and Organic fertilizers, Training on Vermicomposting, Training on Organic Swine and Poultry, Training on Hydrophonics KSK (Kaisa sa Kasaganaan): vegetables, producing high value commercial crops (December to April)</textarea>
+<div>
+	<ul id="form-tabs" class="nav nav-tabs" role="tablist">
+		<li><a href="#corpus" role="tab" data-toggle="tab">Corpus</a></li>
+		<li><a href="#sentiment-analyzer" role="tab" data-toggle="tab">Sentiment Analyzer</a></li>
+		<li><a href="#corpus-uploader" role="tab" data-toggle="tab">Corpus Uploader</a></li>
+	</ul>
+	<div class="tab-content">
+		<div id="corpus" class="center tab-pane fade in">
+			<table class="table table-hover">
+				<tr>
+					<td class="table-header">Text</td>
+					<td class="table-header">Emotion</td>					
+				</tr>
+				{% for corpus in sentiment_corpus %}
+				<tr>
+					<td>{{ corpus.text }}</td>
+					<td>{{ corpus.emotion }}</td>					
+				</tr>
+				{% endfor %}
+			</table>
 		</div>
-		<input type="submit" value="Process" class="btn btn-success"/>
-	</form>
+		<div id="sentiment-analyzer" class="center tab-pane fade">
+			<form action="{% url 'sentiment_analyzer:results' %}" method="post" role="form">
+			{% csrf_token %}
+				<div class="form-group">
+					<label for="text">Text</label>
+					<textarea name="text" id="text" class="form-control" rows="8" cols="40">It is such as great day to do SP. There are many wonderful lessons that can be learned. This is a nice way to travel. Transportation in this area is scary. This is such an awful event.</textarea>
+				</div>
+				<input type="submit" value="Process" class="btn btn-success"/>
+			</form>
+		</div>
+		<div id="corpus-uploader" class="center tab-pane fade">
+			<form id="corpus-uploader-form" enctype="multipart/form-data" action="{% url 'sentiment_analyzer:upload_corpus' %}" method="post" role="form">
+			{% csrf_token %}
+				<div class="form-group">
+					<label for="corpus-file-name">File</label>
+					<input type="file" id="corpus-file-name" class="form-control" name="corpus_file" />
+				</div>
+				<input type="submit" class="btn btn-success" value="Upload" />
+			</form>
+		</div>
+	</div>
 </div>
-<script src="{% static 'sentiment_analyzer/jquery-1.11.1.min.js' %}"?></script>
-<script src="{% static 'sentiment_analyzer/scripts.js' %}"?></script>
+
+{% include 'includes/footer.html' %}

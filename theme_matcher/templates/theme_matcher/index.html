@@ -2,16 +2,16 @@
 
 <div>
 	<ul id="form-tabs" class="nav nav-tabs" role="tablist">
-		<li><a href="#home" role="tab" data-toggle="tab">Home</a></li>
+		<li><a href="#corpus" role="tab" data-toggle="tab">Corpus</a></li>
 		<li><a href="#theme-matcher" role="tab" data-toggle="tab">Theme Matcher</a></li>
 		<li><a href="#corpus-uploader" role="tab" data-toggle="tab">Corpus Uploader</a></li>
 	</ul>
 	<div class="tab-content">
-		<div id="home" class="center tab-pane fade in">
+		<div id="corpus" class="center tab-pane fade in">
 			<table class="table table-hover">
 				<tr>
-					<td>Text</td>
-					<td>Themes</td>					
+					<td class="table-header">Text</td>
+					<td class="table-header">Themes</td>					
 				</tr>
 				{% for corpus in classified_corpus %}
 				<tr>
@@ -30,7 +30,7 @@
 				</div>
 				<div class="form-group">
 					<label for="text">Text</label>
-					<textarea name="text" id="text" class="form-control" rows="5" cols="40">Many of the trainings he  attended  in the last  two years  were   on   organic  agriculture, climate  change  and even hydrophonics .  to name  a few are as  follows;    Trainer on Training (TOT )on Organic farming (requested by Albay DTI), Trainer on Training (TOT) on Climate Change, Trainer on Training (TOT) on Organic farming and Organic fertilizers, Training on Vermicomposting, Training on Organic Swine and Poultry, Training on Hydrophonics KSK (Kaisa sa Kasaganaan): vegetables, producing high value commercial crops (December to April)</textarea>
+					<textarea name="text" id="text" class="form-control" rows="9" cols="40">Many of the trainings he  attended  in the last  two years  were   on   organic  agriculture, climate  change  and even hydrophonics .  to name  a few are as  follows;    Trainer on Training (TOT )on Organic farming (requested by Albay DTI), Trainer on Training (TOT) on Climate Change, Trainer on Training (TOT) on Organic farming and Organic fertilizers, Training on Vermicomposting, Training on Organic Swine and Poultry, Training on Hydrophonics KSK (Kaisa sa Kasaganaan): vegetables, producing high value commercial crops (December to April)</textarea>
 				</div>
 				<input type="submit" value="Process" class="btn btn-success"/>
 			</form>

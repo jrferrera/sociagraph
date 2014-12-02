@@ -1,0 +1,13 @@
+h1, h2, h3, h4, h5, h6 { text-align: center; }
+
+.center {
+	margin-left: auto;
+	margin-right: auto;
+	width: 70%;
+}
+
+#theme-matcher, #corpus-uploader {
+	height: 10%;
+	width: 40%;
+	margin-top: 10%;
+}
