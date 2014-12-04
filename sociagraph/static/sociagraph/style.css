@@ -1,13 +1,48 @@
 h1, h2, h3, h4, h5, h6 { text-align: center; }
 
-.center {
-	margin-left: auto;
-	margin-right: auto;
-	width: 70%;
+html {
+	height: 100%;
 }
 
-#theme-matcher, #corpus-uploader {
-	height: 10%;
-	width: 40%;
-	margin-top: 10%;
+body {
+	padding: 70px;
+	height: 100%;
+}
+
+#header .header-menu-item{
+	color: white;
+}
+
+.center {
+	margin-left: auto;
+	margin-right: auto;	
+}
+
+.table-header {
+	font-weight: bold;
+	text-align: center;
+}
+
+#container {
+	margin-bottom: 100px;
+}
+
+#theme-matcher, #sentiment-analyzer, #corpus-uploader {
+	width: 80%;
+	margin-top: 3%;
+}
+
+#copyright {
+	text-align: center;
+}
+
+#back-to-top {
+	text-align: center;
+	margin-left: 40px;
+}
+
+#footer {
+	padding-top: 15px;
+	text-align: center;
+	color: white;
 }

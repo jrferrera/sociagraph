@@ -1,0 +1,21 @@
+{% include 'includes/header.html' %}
+
+<div>
+	<div id="corpus">
+		{% include 'includes/pagination.html' %}
+		<table class="table table-hover">
+			<tr>
+				<td class="table-header">Text</td>
+				<td class="table-header">Themes</td>					
+			</tr>
+			{% for corpus in classified_corpus %}
+			<tr>
+				<td>{{ corpus.text }}</td>
+				<td>{{ corpus.theme }}</td>					
+			</tr>
+			{% endfor %}
+		</table>
+	</div>
+</div>
+
+{% include 'includes/footer.html' %}

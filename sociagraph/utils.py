@@ -1,24 +1,38 @@
 import re as regex
+import operator
+from random import shuffle
+
 import nltk
+from nltk import WordNetLemmatizer
 from nltk.corpus import PlaintextCorpusReader
 from nltk.corpus import stopwords
 from nltk.corpus import wordnet
-from random import shuffle
-from sklearn.svm import LinearSVC
-from sklearn.svm import SVC
 from nltk.classify.scikitlearn import SklearnClassifier
+
+from sklearn.svm import LinearSVC
+
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
 from sklearn.metrics import f1_score
 from sklearn.metrics import classification_report
 
+# Reference for nltk: Bird, Steven, Edward Loper and Ewan Klein (2009), Natural Language Processing with Python. O'Reilly Media Inc.
 
 # Description: Get the total number of words
 # Parameter/s: string
 # Return:	   string
+# Dependecies: remove_extra_whitespaces()
 def count_words(text):
-	return len(text.split(' '))
+	return len(remove_extra_whitespaces(text).split(' '))
+
+# Description: Get the total number of vocabulary or unique words
+# Parameter/s: string
+# Return:	   string
+# Dependecies: tokenize() | remove_extra_whitespaces()
+def get_vocabulary_count(text):
+	return len(set(tokenize(remove_extra_whitespaces(text))))
+
 
 # Description: Transform string to Text
 # Parameter/s: string
@@ -43,6 +57,12 @@ def remove_non_alphanumeric(word):
 # Return:	   string
 def remove_extra_whitespaces(word):
 	return " ".join(word.split())
+
+# Description: Remove spaces
+# Parameter/s: string
+# Return:	   string
+def remove_spaces(word):
+	return regex.sub("[ ]", '', word)
 
 # Description: Checks the lexical diversity of the text
 # Parameter/s: string
@@ -78,9 +98,29 @@ def tokenize(text):
 	text = regex.sub('[^A-Za-z0-9\- ]+', '', text)
 	return nltk.word_tokenize(unicode_to_string(text))
 
+# Description: Sort a dictionary by value
+# Parameter/s: dictionary
+# Return:	   list
+# Reference: http://stackoverflow.com/questions/613183/sort-a-python-dictionary-by-value
+def sort_dictionary_by_value(dictionary, reverse = False):
+	if not reverse:
+		return sorted(dictionary.items(), key = operator.itemgetter(1))
+	else:
+		return sorted(dictionary.items(), key = operator.itemgetter(1)).reverse()
+
+# Description: Sort a dictionary by key
+# Parameter/s: dictionary
+# Return:	   list
+# Reference: http://stackoverflow.com/questions/613183/sort-a-python-dictionary-by-value
+def sort_dictionary_by_key(dictionary, reverse = False):
+	if not reverse:
+		return sorted(dictionary.items(), key = operator.itemgetter(0))
+	else:
+		return sorted(dictionary.items(), key = operator.itemgetter(0)).reverse()
+
 # Description: Count the frequeny of each word
 # Parameter/s: string
-# Return:	   dictionary
+# Return:	   dict
 def get_bag_of_words(text):
 	bag_of_words = dict()
 	text = regex.sub('[^A-Za-z ]+', ' ', text)
@@ -324,12 +364,28 @@ def assign_theme(labeled_corpora, theme):
 
 	return labeled_text
 
+# Description:  Get the features
+# Parameter/s:  str | list
+# Return:	    dict { contains(word): True, is_synonymous }
+# Dependencies: tokenize() | is_synonymous() | lemmatize()
+def get_features(text, feature_sets_words, theme):
+	features = {}
+
+	for word in tokenize(text.lower()):
+		features.update({
+			'contains(' + word + ')': lemmatize(word) in feature_sets_words,
+			'synonymous_to_theme(' + word + ')': is_synonymous(lemmatize(word), lemmatize(theme))
+			})
+
+	return features
+
 # Description:  Get the feature sets
 # Parameter/s:  [ (word, theme) ... ] | [ word, ... ] | str
-# Return:	    list [({ contains(word): True, is_synonymous(word): True })]
-# Dependencies: tokenize()
-def get_feature_sets(combined_labeled_text, feature_set_words):
-	feature_sets = [ ({ word: (word in tokenize(item[0])) for word in feature_set_words }, item[1]) for item in combined_labeled_text ]
+# Return:	    list [({ contains(word): True })]
+# Dependencies: get_features()
+def get_theme_corpus_feature_sets(combined_labeled_text, feature_set_words, theme):
+	# feature_sets = [ ({ word: (word in tokenize(item[0])) for word in feature_set_words }, item[1]) for item in combined_labeled_text ]
+	feature_sets = [ ( get_features(item[0].lower(), feature_set_words, theme), item[1]) for item in combined_labeled_text ]
 	
 	return feature_sets
 
@@ -382,4 +438,50 @@ def get_classification_report(correct_labels, test_labels, theme):
 	not_theme = 'not_' + theme
 	target_names = [theme, not_theme]
 	return classification_report(correct_labels, test_labels, target_names=target_names)
+
+# Description:  Lemmatize the string / Covert to singular sense
+# Parameter/s:  str
+# Return:	    str
+def lemmatize(string):
+	lemmatizer = WordNetLemmatizer()
+
+	return lemmatizer.lemmatize(string)
+
+# similarity
+
+# from nltk.corpus import wordnet as wn
+# 	similarts = []
+
+# 	Aword = 'language'
+# 	Bword = 'barrier'
+
+# 	synsetsA = wn.synsets(Aword)
+# 	synsetsB = wn.synsets(Bword)
+
+# 	groupA = [wn.synset(str(synset.name())) for synset in synsetsA]
+# 	groupB = [wn.synset(str(synset.name())) for synset in synsetsB]
+
+# 	for sseta in groupA:
+# 		for ssetb in groupB:
+# 			path_similarity = sseta.path_similarity(ssetb)
+# 			wup_similarity = sseta.wup_similarity(ssetb)
+
+# 			if path_similarity is not None:
+# 				similars.append({
+# 					'path':path_similarity,
+# 					'wup':wup_similarity,
+# 					'wordA':sseta,
+# 					'wordB':ssetb,
+# 					'wordA_definition':sseta.definition(),
+# 					'wordB_definition':ssetb.definition()
+# 				})
+# Sorting similarity probability
+# similars = sorted(similars, key=lambda item: item['path'], reverse=True)
+
+
+# Organized printing
+# for item in similars:
+# 	print item['wordA'],"-",item['wordA_definition']
+# 	print item['wordB'],"-",item['wordB_definition']
+# 	print 'Path similarity - ', item['path'],'\n'
 

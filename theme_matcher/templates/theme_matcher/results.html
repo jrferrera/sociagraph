@@ -1,8 +1,7 @@
 {% include 'includes/header.html' %}
 
-<div>
+<div id="container">
 	<ul id="menu-tabs" class="nav nav-tabs" role="tablist">
-		<li class="active"><a href="#home" role="tab" data-toggle="tab">Home</a></li>
 		<li><a href="#inputs" role="tab" data-toggle="tab">Inputs</a></li>
 		<li><a href="#tokens" role="tab" data-toggle="tab">Tokens</a></li>
 		<li><a href="#bag-of-words" role="tab" data-toggle="tab">Bag of Words</a></li>
@@ -12,13 +11,10 @@
 	</ul>
 
 	<div class="tab-content">
-		<div id="home" class="tab-pane fade in active">
+		<div id="inputs" class="tab-pane fade in active">
 			<div>{{ test }}</div>
-		</div>
-
-		<div id="inputs" class="tab-pane fade">
 			<h3>Theme Data</h3>
-			{% for theme, definitions in theme_definitions %}
+			{% for theme, definitions in theme_definitions.items %}
 			<p>
 				{{ theme }}
 				<ul>
@@ -32,6 +28,17 @@
 			<div>
 				{{ original_text }}
 			</div>
+			<h3>Input Information</h3>
+			<table class="table table-hover">
+				<tr>
+					<td>Vocabulary Size</td>
+					<td>{{ vocabulary_size }}</td>
+				</tr>
+				<tr>
+					<td>Number of Words</td>
+					<td>{{ original_text_length }}</td>
+				</tr>
+			</table>
 		</div>
 
 		<div id="tokens" class="tab-pane fade">
@@ -49,10 +56,10 @@
 			<h3>Bag of Words</h3>
 			<table class="table table-hover">
 				<tr>
-					<td>Word</td>
-					<td>Frequency</td>
+					<td class="table-header">Word</td>
+					<td class="table-header">Frequency</td>
 				</tr>
-				{% for word, frequency in bag_of_words.items %}
+				{% for word, frequency in bag_of_words %}
 				<tr>
 					<td>{{ word }}</td>
 					<td>{{ frequency }}</td>
@@ -65,9 +72,9 @@
 			<h3>Part of Speech Tags</h3>
 			<table class="table table-hover">
 				<tr>
-					<td>Word</td>
-					<td>Tag</td>
-					<td>Tag Equivalent</td>
+					<td class="table-header">Word</td>
+					<td class="table-header">Tag</td>
+					<td class="table-header">Tag Equivalent</td>
 				</tr>
 				{% for word, tag, tag_value in pos_tags %}
 				<tr>
@@ -83,8 +90,8 @@
 			<h3>Classification Results</h3>
 			<table class="table table-hover">
 				<tr>
-					<td>Sentence</td>
-					<td>Label</td>
+					<td class="table-header">Sentence</td>
+					<td class="table-header">Label</td>
 				</tr>
 				{% for theme, per_sentence in theme_classification_results.items %}
 					{% for sentence, label in per_sentence.items %}
@@ -100,15 +107,33 @@
 		<div id="classification-statistics" class="tab-pane fade">
 			<h3>Classification Statistics</h3>
 			{% for theme, scores in theme_classification_statistics.items %}
+				<hr />
 				<h4>{{ theme }}</h4>
-				<table class="table table-hover">
-					{% for category, score in scores.items %}
-						<tr>
-							<td>{{ category.title }}</td>
-							<td>{{ score }}</td>
-						</tr>
-					{% endfor %}
-				</table>
+				{% if scores == None %}
+					No data.
+				{% else %}
+					<table class="table table-hover">
+						{% for category, score in scores.items %}
+							<tr>
+								<td>{{ category.title }}</td>
+								<td>{{ score }}</td>
+							</tr>
+						{% endfor %}
+					</table>
+					<h5>Corpora Information</h5>
+					<table class="table table-hover">	
+						{% for corpora_theme, statistics in corpora_statistics.items %}
+							{% if corpora_theme == theme %}
+								{% for index, value in statistics %}
+									<tr>
+										<td>{{ index }}</td>
+										<td>{{ value }}</td>
+									</tr>
+								{% endfor %}
+							{% endif %}
+						{% endfor %}
+					</table>
+				{% endif %}
 			{% endfor %}
 		</div>
 	</div>

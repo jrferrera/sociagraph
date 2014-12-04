@@ -1,140 +1,180 @@
-import re
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 from sociagraph.models import Classified_Corpus
 from django.db.models import Q
-# Import utilities in utils.py
+
 from sociagraph.utils import *
 
 
 def index(request):
 	template_name = 'theme_matcher/index.html'
 
+	return render(request, template_name)
+
+
+def corpus(request):
+	template_name = 'theme_matcher/corpus.html'
+
+	# Get the corpora from the database
 	classified_corpus = Classified_Corpus.objects.all()
 
-	return render(request, template_name, { 'classified_corpus': classified_corpus })
+	# Setup pagination
+	paginator = Paginator(classified_corpus, 10)
+
+	page = request.GET.get('page')
+
+	try:
+		corpora = paginator.page(page)
+	except PageNotAnInteger:
+		corpora = paginator.page(1)
+	except EmptyPage:
+		corpora = paginator.page(paginator.num_pages)
+
+	return render(request, template_name, {
+		'classified_corpus': corpora,
+		'items': corpora,
+		})
+
 
 def results(request):
 	template_name = 'theme_matcher/results.html'
 
-	themes = request.POST.get('theme', False)
-	original_text = request.POST.get('text', False)
+	themes = request.POST.get('theme')
+	original_text = request.POST.get('text')
 	
-	# Process the themes
+	# Clean the themes
 	themes = remove_non_letters(themes)
 	themes = remove_extra_whitespaces(themes)
-	themes = tokenize(themes)
+	theme_list = tokenize(themes)
 
-	theme_definitions = {}
-	# Process the tokens
+	# ==== Output variables ====
 	tokens = tokenize(original_text)
-
-	# === Analyze the contents ==
 	original_text_length = count_words(original_text)
+	vocabulary_size = get_vocabulary_count(original_text)
+	bag_of_words = sort_dictionary_by_key(get_bag_of_words(original_text))
 
-	# Get vocabulary size
-	vocabulary_size = len(set(transform_to_text(original_text)))
-	# ===========================
-
-	# Process the Bag of Words
-	bag_of_words = get_bag_of_words(original_text)
-
-	# Process POS Tagging
 	pos_tags = get_pos_tags(original_text)
 	pos_tags = get_pos_tag_values(pos_tags)
 
-	# Contains all resulting data
 	theme_classification_results = {}
 	theme_classification_statistics = {}
-	theme_definitions = []
+	theme_definitions = {}
+	corpora_statistics = {}
+	# ==========================
 
-	for theme in themes:
-		theme_definitions.append((theme, get_word_definitions(theme)))
+	test = ''
+
+	for theme in theme_list:
+		theme_definitions[theme] = get_word_definitions(theme)
 
 		labeled_text = {}
 
 		not_theme = 'not_' + theme
+
 		# Get text with matching theme from database
 		labeled_corpora = Classified_Corpus.objects.filter(theme__contains=theme).values('text')
+		# labeled_corpora = Classified_Corpus.objects.filter(theme__contains=theme).values('text').order_by('?')[:10]
 		
-		# Get text not matching the theme from database
-		opposite_labeled_corpora = Classified_Corpus.objects.filter(~Q(theme__contains=theme)).values('text').order_by('?')[:labeled_corpora.count()]
+		labeled_corpora_count = labeled_corpora.count()
 
-		# Assign each result to given theme
-		labeled_text[theme] = assign_theme(labeled_corpora, theme)
+		if labeled_corpora_count >= 2:
+			# Get text not matching the theme from database
+			opposite_labeled_corpora = Classified_Corpus.objects.filter(~Q(theme__contains=theme)).values('text').order_by('?')[:labeled_corpora.count()]
 
-		# Assign each result to given theme
-		labeled_text[not_theme] = assign_theme(opposite_labeled_corpora, not_theme)
+			# Assign each result to given theme
+			labeled_text[theme] = assign_theme(labeled_corpora, theme)
 
-		# Combine opposing themes
-		combined_labeled_text = labeled_text[theme] + labeled_text[not_theme]
-		
-		# Shuffle the combined text with labels
-		shuffle_set(combined_labeled_text)
-		
-		# Get the vocabulary of the combined labels
-		feature_set_words = get_feature_set_words(combined_labeled_text)
+			# Assign each result to given theme
+			labeled_text[not_theme] = assign_theme(opposite_labeled_corpora, not_theme)
 
-		# Check if the words in a paragraph is in feature set words
-		feature_sets = get_feature_sets(combined_labeled_text, feature_set_words)
+			# Combine opposing themes
+			combined_labeled_text = labeled_text[theme] + labeled_text[not_theme]
+			
+			# Shuffle the combined text with labels
+			shuffle_set(combined_labeled_text)
+			
+			# Get the vocabulary of the combined labels
+			feature_set_words = get_feature_set_words(combined_labeled_text)
 
-		set_size = len(feature_sets)/2
-		test_set = feature_sets[:set_size]
-		train_set = feature_sets[set_size:]
+			# Check if the words in a paragraph is in feature set words
+			feature_sets = get_theme_corpus_feature_sets(combined_labeled_text, feature_set_words, theme)
 
-		svm_classifier = create_svm_classifier()
-		svm_classifier = train_classifier(svm_classifier, train_set)
+			set_size = len(feature_sets)/2
+			test_set = feature_sets[:set_size]
+			train_set = feature_sets[set_size:]
 
-		test_set_features = []
-		test_set_correct_classifications = []
-		classification_scores = {}
+			svm_classifier = create_svm_classifier()
+			svm_classifier = train_classifier(svm_classifier, train_set)
 
-		# Get the test features and labels for metrics
-		for features, labels in test_set:
-			test_set_features.append(features)
-			test_set_correct_classifications.append(labels)
+			test_set_features = []
+			test_set_correct_classifications = []
+			classification_scores = {}
 
-		test_set_reclassification = svm_classifier.classify_many(test_set_features)
-		classification_scores = get_classification_scores(test_set_correct_classifications, test_set_reclassification, [theme, not_theme])
+			# Get the test features and labels for metrics
+			for features, labels in test_set:
+				test_set_features.append(features)
+				test_set_correct_classifications.append(labels)
 
-		classified_sentences = {}
-		keywords = []
+			test_set_reclassification = svm_classifier.classify_many(test_set_features)
+			classification_scores = get_classification_scores(test_set_correct_classifications, test_set_reclassification, [theme, not_theme])
 
-		for sentence in paragraph_to_sentences(original_text):
-			classification_test = {word: (word in tokenize(sentence)) for word in feature_set_words }
+			classified_sentences = {}
+			keywords = []
 
-			# Get each theme classification per sentence
-			classified_sentences[sentence] = svm_classifier.classify(classification_test)
+			for sentence in paragraph_to_sentences(original_text):
+				# classification_test = { word: (word in tokenize(sentence)) for word in feature_set_words }
+				classification_test = get_features(sentence, feature_set_words, theme)
 
-			# Get keywords from sentences matching the theme
-			# if(classified_sentences[sentence].rstrip() == theme)
-			# 	classified_sentences[sentence]["keywords"] = get_keywords(sentence, theme)
+				# Get each theme classification per sentence
+				classified_sentences[sentence] = svm_classifier.classify(classification_test)
 
-		theme_classification_results[theme] = {}
-		theme_classification_statistics[theme] = {}
-		theme_classification_results[theme] = classified_sentences
-		theme_classification_statistics[theme] = classification_scores
+				# Get keywords from sentences matching the theme
+				# if(classified_sentences[sentence].rstrip() == theme)
+				# 	classified_sentences[sentence]["keywords"] = get_keywords(sentence, theme)
 
-		test = theme_classification_statistics
+			theme_classification_results[theme] = classified_sentences
+			theme_classification_statistics[theme] = classification_scores
+			corpora_statistics[theme] = sort_dictionary_by_key({ 'Corpora Total': labeled_corpora_count * 2, 'Test Set Count': labeled_corpora_count, 'Train Set Count': labeled_corpora_count })
+		else:
+			theme_classification_results[theme] = None
+			theme_classification_statistics[theme] = None
+			corpora_statistics[theme] = None
+
+			test = original_text_length
 
 	return render(request, template_name, {
-		'themes': themes,
 		'theme_definitions': theme_definitions,
 		'original_text': original_text,
+		'vocabulary_size': vocabulary_size,
+		'original_text_length': original_text_length,
 		'tokens': tokens,
 		'bag_of_words': bag_of_words,
 		'pos_tags': pos_tags,
-		'bigrams': bigrams,
 		'theme_classification_results': theme_classification_results,
 		'theme_classification_statistics': theme_classification_statistics,
+		'corpora_statistics': corpora_statistics,
 		'test': test,
 		})
 
-def upload_corpus(request):
-	template_name = 'theme_matcher/index.html'
 
-	filename = request.POST.get('corpus_file')
-	source_file = open(filename, 'r')
-	source_file.readline()
-	source_file.close()
-	return render(request, template_name, { 'filename': filename })
+def add_corpus(request):
+	template_name = 'theme_matcher/add_corpus.html'
+
+	return_values = {}
+
+	if request.POST:
+		text = remove_extra_whitespaces(request.POST.get('text', False))
+		theme = remove_spaces(request.POST.get('theme', False)).lower()
+
+		if text != "" or theme != "":
+			Classified_Corpus(text=text, theme=theme).save()
+
+			return_values['notification_type'] = 'success'
+			return_values['notification_message'] = 'Successfully added a corpus.'
+		else:
+			return_values['notification_type'] = 'error'
+			return_values['notification_message'] = 'Failed to add corpus.'
+
+	return render(request, template_name, return_values)

@@ -1,52 +1,19 @@
 {% include 'includes/header.html' %}
 
 <div>
-	<ul id="form-tabs" class="nav nav-tabs" role="tablist">
-		<li><a href="#corpus" role="tab" data-toggle="tab">Corpus</a></li>
-		<li><a href="#theme-matcher" role="tab" data-toggle="tab">Theme Matcher</a></li>
-		<li><a href="#corpus-uploader" role="tab" data-toggle="tab">Corpus Uploader</a></li>
-	</ul>
-	<div class="tab-content">
-		<div id="corpus" class="center tab-pane fade in">
-			<table class="table table-hover">
-				<tr>
-					<td class="table-header">Text</td>
-					<td class="table-header">Themes</td>					
-				</tr>
-				{% for corpus in classified_corpus %}
-				<tr>
-					<td>{{ corpus.text }}</td>
-					<td>{{ corpus.theme }}</td>					
-				</tr>
-				{% endfor %}
-			</table>
-		</div>
-		<div id="theme-matcher" class="center tab-pane fade">
-			<form id="theme-matcher-form" action="{% url 'theme_matcher:results' %}" method="post" role="form">
-			{% csrf_token %}
-				<div class="form-group">
-					<label for="theme">Theme</label>
-					<input type="text" name="theme" id="theme" class="form-control" value="agriculture"/>
-				</div>
-				<div class="form-group">
-					<label for="text">Text</label>
-					<textarea name="text" id="text" class="form-control" rows="9" cols="40">Many of the trainings he  attended  in the last  two years  were   on   organic  agriculture, climate  change  and even hydrophonics .  to name  a few are as  follows;    Trainer on Training (TOT )on Organic farming (requested by Albay DTI), Trainer on Training (TOT) on Climate Change, Trainer on Training (TOT) on Organic farming and Organic fertilizers, Training on Vermicomposting, Training on Organic Swine and Poultry, Training on Hydrophonics KSK (Kaisa sa Kasaganaan): vegetables, producing high value commercial crops (December to April)</textarea>
-				</div>
-				<input type="submit" value="Process" class="btn btn-success"/>
-			</form>
-		</div>
-
-		<div id="corpus-uploader" class="center tab-pane fade">
-			{{ filename }}
-			<form id="corpus-uploader-form" enctype="multipart/form-data" action="{% url 'theme_matcher:upload_corpus' %}" method="post" role="form">
-			{% csrf_token %}
-				<div class="form-group">
-					<label for="corpus-file-name">File</label>
-					<input type="file" id="corpus-file-name" class="form-control" name="corpus_file" />
-				</div>
-				<input type="submit" class="btn btn-success" value="Upload" />
-			</form>
-		</div>
+	<div id="theme-matcher">
+		<form id="theme-matcher-form" action="{% url 'theme_matcher:results' %}" method="post" role="form">
+		{% csrf_token %}
+			<div class="form-group">
+				<label for="theme">Theme</label>
+				<input type="text" name="theme" id="theme" class="form-control" value="agriculture"/>
+			</div>
+			<div class="form-group">
+				<label for="text">Text</label>
+				<textarea name="text" id="text" class="form-control" rows="9" cols="40">Many of the trainings he  attended  in the last  two years  were   on   organic  agriculture, climate  change  and even hydrophonics .  to name  a few are as  follows;    Trainer on Training (TOT )on Organic farming (requested by Albay DTI), Trainer on Training (TOT) on Climate Change, Trainer on Training (TOT) on Organic farming and Organic fertilizers, Training on Vermicomposting, Training on Organic Swine and Poultry, Training on Hydrophonics KSK (Kaisa sa Kasaganaan): vegetables, producing high value commercial crops (December to April)</textarea>
+			</div>
+			<input type="submit" value="Process" class="btn btn-success"/>
+		</form>
 	</div>
 </div>
 

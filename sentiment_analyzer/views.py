@@ -1,15 +1,36 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from sociagraph.models import Sentiment_Corpus
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from sociagraph.utils import *
 
 def index(request):
 	template_name = 'sentiment_analyzer/index.html'
 
+	return render(request, template_name)
+
+
+def corpus(request):
+	template_name = 'sentiment_analyzer/corpus.html'
+
+	# Get the corpora from the database
 	sentiment_corpus = Sentiment_Corpus.objects.all()
 
+	# Setup pagination
+	paginator = Paginator(sentiment_corpus, 10)
+
+	page = request.GET.get('page')
+
+	try:
+		corpora = paginator.page(page)
+	except PageNotAnInteger:
+		corpora = paginator.page(1)
+	except EmptyPage:
+		corpora = paginator.page(paginator.num_pages)
+
 	return render(request, template_name, {
-		'sentiment_corpus': sentiment_corpus,
+		'sentiment_corpus': corpora,
+		'items': corpora,
 		})
 
 def results(request):
@@ -88,11 +109,22 @@ def results(request):
 		'test': test,
 		})
 
-def upload_corpus(request):
-	template_name = 'sentiment_analyzer/index.html'
+def add_corpus(request):
+	template_name = 'sentiment_analyzer/add_corpus.html'
 
-	filename = request.POST.get('corpus_file')
-	source_file = open(filename, 'r')
-	source_file.readline()
-	source_file.close()
-	return render(request, template_name, { 'filename': filename })
+	return_values = {}
+
+	if request.POST:
+		text = remove_extra_whitespaces(request.POST.get('text', False))
+		emotion = remove_spaces(request.POST.get('sentiment', False)).lower()
+
+		if text != "" or emotion != "":
+			Sentiment_Corpus(text=text, emotion=emotion).save()
+
+			return_values['notification_type'] = 'success'
+			return_values['notification_message'] = 'Successfully added a corpus.'
+		else:
+			return_values['notification_type'] = 'error'
+			return_values['notification_message'] = 'Failed to add corpus.'
+
+	return render(request, template_name, return_values)
