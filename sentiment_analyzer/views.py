@@ -36,7 +36,7 @@ def corpus(request):
 def results(request):
 	template_name = 'sentiment_analyzer/results.html'
 
-	original_text = request.POST.get('text', False)
+	original_text = request.POST.get('text')
 
 	sentiments = ['happy', 'sad', 'angry', 'fearful', 'neutral']
 	
@@ -47,20 +47,20 @@ def results(request):
 	tokens = tokenize(original_text)
 
 	# Get vocabulary size
-	vocabulary_size = len(set(transform_to_text(original_text)))
-
+	vocabulary_size = get_vocabulary_count(original_text)
+	original_text_length = count_words(original_text)
 	# Process the Bag of Words
-	bag_of_words = get_bag_of_words(original_text)
+	bag_of_words = sort_dictionary_by_key(get_bag_of_words(original_text))
 
 	# Process POS Tagging
 	pos_tags = get_pos_tags(original_text)
 	pos_tags = get_pos_tag_values(pos_tags)
 
 	# Get all text from database
-	labeled_corpora = Sentiment_Corpus.objects.all()
-
+	labeled_corpora = Sentiment_Corpus.objects.order_by('?')[:10]
+	corpora_statistics = {}
 	emotion_labeled_corpora = []
-
+	labeled_corpora_count = labeled_corpora.count()
 	for corpus in labeled_corpora:
 		emotion_labeled_corpora.append((unicode_to_string(corpus.text), unicode_to_string(corpus.emotion)))
 
@@ -91,19 +91,28 @@ def results(request):
 	sentiment_classification_statistics = get_classification_scores(test_set_correct_classifications, test_set_reclassification, sentiments)	
 
 	classified_sentences = {}
+	sentiment_frequency = { 'happy': 0, 'sad': 0, 'angry': 0, 'fearful': 0, 'neutral': 0 }
+
 	for sentence in paragraph_to_sentences(original_text):
-		classification_test = {word: (word in tokenize(sentence)) for word in feature_set_words }
+		classification_test = {word: (word in tokenize(remove_stopwords(sentence))) for word in feature_set_words }
 
 		# Get each theme classification per sentence
-		classified_sentences[sentence] = svm_classifier.classify(classification_test)
-	test = sentiment_classification_statistics
-
+		classification = svm_classifier.classify(classification_test)
+		classified_sentences[sentence] = classification
+		sentiment_frequency.update({ classification: sentiment_frequency[classification]+1 })
+	test = sentiment_frequency
+	corpora_statistics = sort_dictionary_by_key({ 'Corpora Total': labeled_corpora_count, 'Test Set Count': labeled_corpora_count/2, 'Train Set Count': labeled_corpora_count /2})
+	sentiment_frequency = sort_dictionary_by_value(sentiment_frequency)
 	return render(request, template_name, {
 		'original_text': original_text,
 		'filtered_text': filtered_text,
+		'vocabulary_size': vocabulary_size,
+		'original_text_length': original_text_length,
+		'corpora_statistics': corpora_statistics,
 		'tokens': tokens,
 		'pos_tags': pos_tags,
 		'bag_of_words': bag_of_words,
+		'sentiment_frequency': sentiment_frequency,
 		'classified_sentences': classified_sentences,
 		'sentiment_classification_statistics': sentiment_classification_statistics,
 		'test': test,

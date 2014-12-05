@@ -1,6 +1,6 @@
 {% include 'includes/header.html' %}
 
-<div>
+<div id="container">
 	<div id="sentiment-analyzer">
 		<form action="{% url 'sentiment_analyzer:results' %}" method="post" role="form">
 		{% csrf_token %}

@@ -74,12 +74,12 @@ def results(request):
 		not_theme = 'not_' + theme
 
 		# Get text with matching theme from database
+		# labeled_corpora = Classified_Corpus.objects.filter(theme__contains=theme).values('text')
 		labeled_corpora = Classified_Corpus.objects.filter(theme__contains=theme).values('text')
-		# labeled_corpora = Classified_Corpus.objects.filter(theme__contains=theme).values('text').order_by('?')[:10]
 		
 		labeled_corpora_count = labeled_corpora.count()
 
-		if labeled_corpora_count >= 2:
+		if labeled_corpora_count >= 3:
 			# Get text not matching the theme from database
 			opposite_labeled_corpora = Classified_Corpus.objects.filter(~Q(theme__contains=theme)).values('text').order_by('?')[:labeled_corpora.count()]
 
@@ -136,13 +136,13 @@ def results(request):
 
 			theme_classification_results[theme] = classified_sentences
 			theme_classification_statistics[theme] = classification_scores
-			corpora_statistics[theme] = sort_dictionary_by_key({ 'Corpora Total': labeled_corpora_count * 2, 'Test Set Count': labeled_corpora_count, 'Train Set Count': labeled_corpora_count })
+			corpora_statistics[theme] = sort_dictionary_by_key({ 'Corpora Total': labeled_corpora_count, 'Test Set Count': labeled_corpora_count, 'Train Set Count': labeled_corpora_count })
 		else:
 			theme_classification_results[theme] = None
 			theme_classification_statistics[theme] = None
 			corpora_statistics[theme] = None
 
-			test = original_text_length
+		# test = test_set
 
 	return render(request, template_name, {
 		'theme_definitions': theme_definitions,

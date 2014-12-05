@@ -1,8 +1,7 @@
 {% include 'includes/header.html' %}
 
-<div>
+<div id="container">
 	<ul id="menu-tabs" class="nav nav-tabs" role="tablist">
-		<li class="active"><a href="#home" role="tab" data-toggle="tab">Home</a></li>
 		<li><a href="#inputs" role="tab" data-toggle="tab">Inputs</a></li>
 		<li><a href="#tokens" role="tab" data-toggle="tab">Tokens</a></li>
 		<li><a href="#bag-of-words" role="tab" data-toggle="tab">Bag of Words</a></li>
@@ -12,14 +11,23 @@
 	</ul>
 
 	<div class="tab-content">
-		<div id="home" class="tab-pane fade in active">
-			{{ test }}
-		</div>
-		<div id="inputs" class="tab-pane fade in">
+		<div id="inputs" class="tab-pane fade in active">
+			{{test}}
 			<h3>Text</h3>
 			<div>
 				{{ original_text }}
 			</div>
+			<h3>Input Information</h3>
+			<table class="table table-hover">
+				<tr>
+					<td>Vocabulary Size</td>
+					<td>{{ vocabulary_size }}</td>
+				</tr>
+				<tr>
+					<td>Number of Words</td>
+					<td>{{ original_text_length }}</td>
+				</tr>
+			</table>
 		</div>
 
 		<div id="tokens" class="tab-pane fade">
@@ -40,7 +48,7 @@
 					<td>Word</td>
 					<td>Frequency</td>
 				</tr>
-				{% for word, frequency in bag_of_words.items %}
+				{% for word, frequency in bag_of_words %}
 				<tr>
 					<td>{{ word }}</td>
 					<td>{{ frequency }}</td>
@@ -70,8 +78,20 @@
 		<div id="classification-results" class="tab-pane fade">
 			<table class="table table-hover">
 				<tr>
-					<td>Sentence</td>
-					<td>Emotion</td>
+					<td class="table-header">Sentiment</td>
+					<td class="table-header">Frequency</td>
+				</tr>
+				{% for sentiment, frequency in sentiment_frequency %}
+					<tr>
+						<td>{{ sentiment }}</td>
+						<td>{{ frequency }}</td>
+					</tr>
+				{% endfor %}
+			</table>
+			<table class="table table-hover">
+				<tr>
+					<td class="table-header">Sentence</td>
+					<td class="table-header">Emotion</td>
 				</tr>
 				{% for sentence, emotion in classified_sentences.items %}
 					<tr>
@@ -89,6 +109,15 @@
 					<tr>
 						<td>{{ category.title }}</td>
 						<td>{{ score }}</td>
+					</tr>
+				{% endfor %}
+			</table>
+			<h5>Corpora Information</h5>
+			<table class="table table-hover">	
+				{% for index, value in corpora_statistics %}
+					<tr>
+						<td>{{ index }}</td>
+						<td>{{ value }}</td>
 					</tr>
 				{% endfor %}
 			</table>

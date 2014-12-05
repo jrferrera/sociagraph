@@ -281,6 +281,8 @@ def paragraph_to_sentences(paragraph):
 	# Replace all occurences of period(.) with a single period(.)
 	new_paragraph = regex.sub('[.]+', '.', paragraph)
 
+	if new_paragraph.endswith('.'):
+		new_paragraph = new_paragraph[:-1]
 	# Removes unicode
 	new_paragraph = unicode_to_string(new_paragraph)
 
@@ -379,6 +381,7 @@ def get_features(text, feature_sets_words, theme):
 
 	return features
 
+
 # Description:  Get the feature sets
 # Parameter/s:  [ (word, theme) ... ] | [ word, ... ] | str
 # Return:	    list [({ contains(word): True })]
@@ -386,6 +389,17 @@ def get_features(text, feature_sets_words, theme):
 def get_theme_corpus_feature_sets(combined_labeled_text, feature_set_words, theme):
 	# feature_sets = [ ({ word: (word in tokenize(item[0])) for word in feature_set_words }, item[1]) for item in combined_labeled_text ]
 	feature_sets = [ ( get_features(item[0].lower(), feature_set_words, theme), item[1]) for item in combined_labeled_text ]
+	
+	return feature_sets
+
+
+# Description:  Get the feature sets
+# Parameter/s:  [ (word, theme) ... ] | [ word, ... ] | str
+# Return:	    list [({ contains(word): True })]
+# Dependencies: get_features()
+def get_feature_sets(combined_labeled_text, feature_set_words):
+	feature_sets = [ ({ word: (lemmatize(word) in tokenize(item[0])) for word in feature_set_words }, item[1]) for item in combined_labeled_text ]
+	# feature_sets = [ ( get_features(item[0].lower(), feature_set_words, theme), item[1]) for item in combined_labeled_text ]
 	
 	return feature_sets
 
@@ -485,3 +499,7 @@ def lemmatize(string):
 # 	print item['wordB'],"-",item['wordB_definition']
 # 	print 'Path similarity - ', item['path'],'\n'
 
+# def get_features_summary(feature_sets):
+# 	features_summary = {}
+# 	for features, label in feature_sets:
+# 		for 
