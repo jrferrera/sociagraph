@@ -1,21 +1,31 @@
+{% load staticfiles %}
 {% include 'includes/header.html' %}
+<link rel="stylesheet" type="text/css" href="{% static 'theme_matcher/style.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'theme_matcher/corpus.css' %}" />
 
-<div>
-	<div id="corpus">
-		{% include 'includes/pagination.html' %}
-		<table class="table table-hover">
-			<tr>
-				<td class="table-header">Text</td>
-				<td class="table-header">Themes</td>					
-			</tr>
-			{% for corpus in classified_corpus %}
-			<tr>
-				<td>{{ corpus.text }}</td>
-				<td>{{ corpus.theme }}</td>					
-			</tr>
-			{% endfor %}
-		</table>
-	</div>
+<div id="container" class="container-fluid">
+	<h3 class="alert alert-success">List of Corpora</h3>
+	<div class="text-center">{% include 'includes/pagination.html' %}</div>
+	<h4 class="text-left">Total Corpora: {{ total_corpora_count }} classified texts</h4>
+	<br />
+	<table class="table table-hover table-condensed">
+		<tr>
+			<td class="table-header">Text</td>
+			<td class="table-header">Themes</td>					
+		</tr>
+		{% for text, themes in classified_corpus %}
+		<tr>
+			<td>{{ text }}</td>
+			<td>
+				<ul>
+					{% for theme in themes %}
+						<li>{{ theme }}</li>
+					{% endfor %}
+				</ul>
+			</td>					
+		</tr>
+		{% endfor %}
+	</table>
 </div>
 
 {% include 'includes/footer.html' %}

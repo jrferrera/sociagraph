@@ -1,16 +1,22 @@
+{% load staticfiles %}
 {% include 'includes/header.html' %}
+<link rel="stylesheet" type="text/css" href="{% static 'sentiment_analyzer/style.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'sentiment_analyzer/index.css' %}" />
 
-<div id="container">
-	<div id="sentiment-analyzer">
-		<form action="{% url 'sentiment_analyzer:results' %}" method="post" role="form">
-		{% csrf_token %}
-			<div class="form-group">
-				<label for="text">Text</label>
-				<textarea name="text" id="text" class="form-control" rows="8" cols="40">It is such as great day to do SP. There are many wonderful lessons that can be learned. This is a nice way to travel. Transportation in this area is scary. This is such an awful event.</textarea>
-				</div>
-				<input type="submit" value="Process" class="btn btn-success"/>
-		</form>
-	</div>
+<div id="container" class="container-fluid">
+	<h3 class="alert alert-success">Sentiment Analyzer</h3>
+	<p>
+		The sentiment analyzer classifies information in the text using sentiments happy, sad, angry, fearful, neutral. 
+	</p>
+	<br />
+	<form action="{% url 'sentiment_analyzer:results' %}" method="post" role="form">
+	{% csrf_token %}
+		<div class="form-group">
+			<label for="text">Text</label>
+			<textarea name="text" id="text" class="form-control" rows="8" cols="40" placeholder="Enter text" required>It is such as great day to do SP. There are many wonderful lessons that can be learned. This is a nice way to travel. Transportation in this area is scary. This is such an awful event.</textarea>
+		</div>
+		<div class="text-center"><input type="submit" class="btn btn-success" value="Analyze Sentiment" /></div>
+	</form>
 </div>
 
 {% include 'includes/footer.html' %}

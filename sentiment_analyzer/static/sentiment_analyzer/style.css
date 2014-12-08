@@ -1,0 +1,8 @@
+/* Responsive */
+@media all and (max-width: 768px) {
+	#container {
+		margin-left: 5%;
+		margin-right: 5%;
+	}
+}
+/* End Responsive */

@@ -5,17 +5,23 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from sociagraph.utils import *
 
 def index(request):
+	application_name = "sentiment-analyzer"
 	template_name = 'sentiment_analyzer/index.html'
 
-	return render(request, template_name)
+	return render(request, template_name, {
+		'application_name': application_name,
+		})
 
 
 def corpus(request):
+	application_name = "sentiment-analyzer"
 	template_name = 'sentiment_analyzer/corpus.html'
 
 	# Get the corpora from the database
 	sentiment_corpus = Sentiment_Corpus.objects.all()
 
+	total_corpora_count = sentiment_corpus.count()
+	
 	# Setup pagination
 	paginator = Paginator(sentiment_corpus, 10)
 
@@ -28,12 +34,20 @@ def corpus(request):
 	except EmptyPage:
 		corpora = paginator.page(paginator.num_pages)
 
+	new_classified_corpus = []
+
+	for corpus in corpora:
+		new_classified_corpus.append((corpus.text, corpus.emotion.split(',')))
+
 	return render(request, template_name, {
-		'sentiment_corpus': corpora,
+		'application_name': application_name,
+		'total_corpora_count': total_corpora_count,
+		'sentiment_corpus': new_classified_corpus,
 		'items': corpora,
 		})
 
 def results(request):
+	application_name = "sentiment-analyzer"
 	template_name = 'sentiment_analyzer/results.html'
 
 	original_text = request.POST.get('text')
@@ -104,6 +118,7 @@ def results(request):
 	corpora_statistics = sort_dictionary_by_key({ 'Corpora Total': labeled_corpora_count, 'Test Set Count': labeled_corpora_count/2, 'Train Set Count': labeled_corpora_count /2})
 	sentiment_frequency = sort_dictionary_by_value(sentiment_frequency)
 	return render(request, template_name, {
+		'application_name': application_name,
 		'original_text': original_text,
 		'filtered_text': filtered_text,
 		'vocabulary_size': vocabulary_size,
@@ -119,9 +134,11 @@ def results(request):
 		})
 
 def add_corpus(request):
+	application_name = "sentiment-analyzer"
 	template_name = 'sentiment_analyzer/add_corpus.html'
 
 	return_values = {}
+	return_values['application_name'] = application_name
 
 	if request.POST:
 		text = remove_extra_whitespaces(request.POST.get('text', False))

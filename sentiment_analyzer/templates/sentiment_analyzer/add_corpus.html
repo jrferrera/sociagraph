@@ -1,19 +1,29 @@
+{% load staticfiles %}
 {% include 'includes/header.html' %}
+<link rel="stylesheet" type="text/css" href="{% static 'sentiment_analyzer/style.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'sentiment_analyzer/add_corpus.css' %}" />
 
-<div>
+<div id="container" class="container-fluid">
+	<h3 class="alert alert-success">Add Corpus</h3>
 	{% include 'includes/notification.html' %}
 	<div id="corpus-adder">
 		<form id="corpus-adder-form" action="{% url 'sentiment_analyzer:add_corpus' %}" method="post" role="form">
 		{% csrf_token %}
 			<div class="form-group">
 				<label for="text">Text</label>
-				<textarea name="text" id="text" class="form-control" rows="9" cols="40"></textarea>
+				<textarea name="text" id="text" class="form-control" rows="9" cols="40" placeholder="Enter text" required></textarea>
 			</div>
 			<div class="form-group">
 				<label for="sentiment">Sentiment</label>
-				<input type="text" name="sentiment" id="sentiment" class="form-control" />
+				<select name="sentiment" id="sentiment" class="form-control">
+					<option value="neutral">Neutral</option>
+					<option value="happy">Happy</option>
+					<option value="sad">Sad</option>
+					<option value="angry">Angry</option>
+					<option value="fearful">Fearful</option>
+				</select>
 			</div>
-			<input type="submit" value="Add Corpus" class="btn btn-success"/>
+			<div class="text-center"><input type="submit" class="btn btn-success" value="Add Corpus" /></div>
 		</form>
 	</div>
 </div>

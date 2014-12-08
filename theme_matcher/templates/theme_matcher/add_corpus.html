@@ -1,19 +1,23 @@
+{% load staticfiles %}
 {% include 'includes/header.html' %}
+<link rel="stylesheet" type="text/css" href="{% static 'theme_matcher/style.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'theme_matcher/add_corpus.css' %}" />
 
-<div>
+<div id="container" class="container-fluid">
+	<h3 class="alert alert-success">Add Corpus</h3>
 	{% include 'includes/notification.html' %}
 	<div id="corpus-adder">
 		<form id="corpus-adder-form" action="{% url 'theme_matcher:add_corpus' %}" method="post" role="form">
 		{% csrf_token %}
 			<div class="form-group">
 				<label for="text">Text</label>
-				<textarea name="text" id="text" class="form-control" rows="9" cols="40"></textarea>
+				<textarea name="text" id="text" class="form-control" rows="9" cols="40" placeholder="Enter text" required></textarea>
 			</div>
 			<div class="form-group">
 				<label for="theme">Theme</label>
-				<input type="text" name="theme" id="theme" class="form-control" />
+				<input type="text" name="theme" id="theme" class="form-control" placeholder="theme,another_theme" required />
 			</div>
-			<input type="submit" value="Add Corpus" class="btn btn-success"/>
+			<div class="text-center"><input type="submit" class="btn btn-success" value="Add Corpus" /></div>
 		</form>
 	</div>
 </div>

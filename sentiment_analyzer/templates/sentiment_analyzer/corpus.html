@@ -1,21 +1,29 @@
+{% load staticfiles %}
 {% include 'includes/header.html' %}
+<link rel="stylesheet" type="text/css" href="{% static 'sentiment_analyzer/style.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'sentiment_analyzer/corpus.css' %}" />
 
-<div id="container">
-	<div id="corpus">
-		{% include 'includes/pagination.html' %}
-		<table class="table table-hover">
-			<tr>
-				<td class="table-header">Text</td>
-				<td class="table-header">Emotion</td>					
-			</tr>
-			{% for corpus in sentiment_corpus %}
-			<tr>
-				<td>{{ corpus.text }}</td>
-				<td>{{ corpus.emotion }}</td>					
-			</tr>
-			{% endfor %}
-		</table>
-	</div>
+<div id="container" class="container-fluid">
+	<h3 class="alert alert-success">List of Corpora</h3>
+	<div class="text-center">{% include 'includes/pagination.html' %}</div>
+	<h4 class="text-left">Total Corpora: {{ total_corpora_count }} classified texts</h4>
+	<br />
+	<table class="table table-hover table-condensed">
+		<tr>
+			<td class="table-header">Text</td>
+			<td class="table-header">Sentiment</td>					
+		</tr>
+		{% for text, sentiments in sentiment_corpus %}
+		<tr>
+			<td>{{ text }}</td>
+			<td>
+				{% for sentiment in sentiments %}
+					{{ sentiment }}
+				{% endfor %}
+			</td>					
+		</tr>
+		{% endfor %}
+	</table>
 </div>
 
 {% include 'includes/footer.html' %}

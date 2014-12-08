@@ -1,8 +1,12 @@
+{% load staticfiles %}
 {% include 'includes/header.html' %}
+<link rel="stylesheet" type="text/css" href="{% static 'theme_matcher/style.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'theme_matcher/results.css' %}" />
 
-<div id="container">
+<div id="container" class="container-fluid">
+	<h3 class="alert alert-success">Key Information Extraction Results</h3>
 	<ul id="menu-tabs" class="nav nav-tabs" role="tablist">
-		<li><a href="#inputs" role="tab" data-toggle="tab">Inputs</a></li>
+		<li class="active"><a href="#inputs" role="tab" data-toggle="tab">Inputs</a></li>
 		<li><a href="#tokens" role="tab" data-toggle="tab">Tokens</a></li>
 		<li><a href="#bag-of-words" role="tab" data-toggle="tab">Bag of Words</a></li>
 		<li><a href="#pos-tags" role="tab" data-toggle="tab">Part of Speech Tags</a></li>
@@ -12,128 +16,149 @@
 
 	<div class="tab-content">
 		<div id="inputs" class="tab-pane fade in active">
-			<div>{{ test }}</div>
-			<h3>Theme Data</h3>
-			{% for theme, definitions in theme_definitions.items %}
-			<p>
-				{{ theme }}
-				<ul>
-				{% for definition in definitions %}
-					<li>{{ definition }}</li>
-				{% endfor %}				
-				</ul>
-			</p>
-			{% endfor %}
-			<h3>Text</h3>
-			<div>
-				{{ original_text }}
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h3 class="panel-title"><strong>Input Statistics</strong></h3>
+				</div>
+				<div class="panel-body">
+					<p>Vocabulary Size: {{ vocabulary_size }}</p>
+					<p>Number of Words: {{ original_text_length }}</p>
+				</div>
 			</div>
-			<h3>Input Information</h3>
-			<table class="table table-hover">
-				<tr>
-					<td>Vocabulary Size</td>
-					<td>{{ vocabulary_size }}</td>
-				</tr>
-				<tr>
-					<td>Number of Words</td>
-					<td>{{ original_text_length }}</td>
-				</tr>
-			</table>
+
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h3 class="panel-title"><strong>Theme Data</strong></h3>
+				</div>
+				<div class="panel-body">
+					{% for theme, definitions in theme_definitions.items %}
+						<strong>{{ theme }}</strong>
+						{% for definition in definitions %}
+							<li>{{ definition }}</li>
+						{% endfor %}
+						<br />
+					{% endfor %}
+				</div>
+			</div>
+
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h3 class="panel-title"><strong>Text</strong></h3>
+				</div>
+				<div class="panel-body">
+					<p class="text-justify">{{ original_text }}</p>
+				</div>
+			</div>
 		</div>
 
 		<div id="tokens" class="tab-pane fade">
-			<h3>Tokens</h3>
-			<table class="table table-hover">
-				{% for token in tokens %}
-				<tr>
-					<td>{{ token }}</td>
-				</tr>
-				{% endfor %}
-			</table>
-		</div>
-
-		<div id="bag-of-words" class="tab-pane fade">
-			<h3>Bag of Words</h3>
-			<table class="table table-hover">
-				<tr>
-					<td class="table-header">Word</td>
-					<td class="table-header">Frequency</td>
-				</tr>
-				{% for word, frequency in bag_of_words %}
-				<tr>
-					<td>{{ word }}</td>
-					<td>{{ frequency }}</td>
-				</tr>
-				{% endfor %}
-			</table>
-		</div>
-
-		<div id="pos-tags" class="tab-pane fade">
-			<h3>Part of Speech Tags</h3>
-			<table class="table table-hover">
-				<tr>
-					<td class="table-header">Word</td>
-					<td class="table-header">Tag</td>
-					<td class="table-header">Tag Equivalent</td>
-				</tr>
-				{% for word, tag, tag_value in pos_tags %}
-				<tr>
-					<td>{{ word }}</td>
-					<td>{{ tag }}</td>
-					<td>{{ tag_value }}</td>
-				</tr>
-				{% endfor %}
-			</table>
-		</div>
-
-		<div id="classification-results" class="tab-pane fade">
-			<h3>Classification Results</h3>
-			<table class="table table-hover">
-				<tr>
-					<td class="table-header">Sentence</td>
-					<td class="table-header">Label</td>
-				</tr>
-				{% for theme, per_sentence in theme_classification_results.items %}
-					{% for sentence, label in per_sentence.items %}
-						<tr>
-							<td>{{ sentence }}</td>
-							<td>{{ label }}</td>
-						</tr>
-					{% endfor %}
-				{% endfor %}
-			</table>
-		</div>
-
-		<div id="classification-statistics" class="tab-pane fade">
-			<h3>Classification Statistics</h3>
-			{% for theme, scores in theme_classification_statistics.items %}
-				<hr />
-				<h4>{{ theme }}</h4>
-				{% if scores == None %}
-					No data.
-				{% else %}
-					<table class="table table-hover">
-						{% for category, score in scores.items %}
+			<div class="panel panel-default">
+				<div class="panel-body">
+					<table class="table table-hover table-condensed">
+						{% for token in tokens %}
 							<tr>
-								<td>{{ category.title }}</td>
-								<td>{{ score }}</td>
+								<td>{{ token }}</td>
 							</tr>
 						{% endfor %}
 					</table>
-					<h5>Corpora Information</h5>
-					<table class="table table-hover">	
-						{% for corpora_theme, statistics in corpora_statistics.items %}
-							{% if corpora_theme == theme %}
-								{% for index, value in statistics %}
-									<tr>
-										<td>{{ index }}</td>
-										<td>{{ value }}</td>
-									</tr>
-								{% endfor %}
-							{% endif %}
+				</div>
+			</div>
+		</div>
+
+		<div id="bag-of-words" class="tab-pane fade">
+			<div class="panel panel-default">
+				<div class="panel-body">
+					<table class="table table-hover table-condensed">
+						<tr>
+							<td class="table-header">Word</td>
+							<td class="table-header">Frequency</td>
+						</tr>
+						{% for word, frequency in bag_of_words %}
+						<tr>
+							<td>{{ word }}</td>
+							<td>{{ frequency }}</td>
+						</tr>
 						{% endfor %}
 					</table>
-				{% endif %}
+				</div>
+			</div>
+		</div>
+
+		<div id="pos-tags" class="tab-pane fade">
+			<div class="panel panel-default">
+				<div class="panel-body">
+					<table class="table table-hover table-condensed">
+						<tr>
+							<td class="table-header">Word</td>
+							<td class="table-header">Part of Speech</td>
+						</tr>
+						{% for word, tag, pos in pos_tags %}
+						<tr>
+							<td>{{ word }}</td>
+							<td>{{ pos }}</td>
+						</tr>
+						{% endfor %}
+					</table>
+				</div>
+			</div>
+		</div>
+
+		<div id="classification-results" class="tab-pane fade">
+			<div class="panel panel-default">
+				<div class="panel-body">
+					<table class="table table-hover table-condensed">
+						<tr>
+							<td class="table-header">Sentence</td>
+							<td class="table-header">Label</td>
+						</tr>
+						{% for theme, per_sentence in theme_classification_results.items %}
+							{% for sentence, label in per_sentence.items %}
+								<tr>
+									<td>{{ sentence }}</td>
+									<td>{{ label }}</td>
+								</tr>
+							{% endfor %}
+						{% endfor %}
+					</table>
+				</div>
+			</div>
+		</div>
+
+		<div id="classification-statistics" class="tab-pane fade">
+			{% for theme, scores in theme_classification_statistics.items %}
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h3 class="panel-title"><strong>{{ theme }}</strong></h3>
+					</div>
+					<div class="panel-body">
+						{% if scores == None %}
+							No data.
+						{% else %}
+							<h4 class="text-left"><strong>Evaluation Metrics</strong></h4>
+							<table class="table table-hover table-condensed">
+								{% for category, score in scores.items %}
+									<tr>
+										<td>{{ category.title }}</td>
+										<td>{{ score }}</td>
+									</tr>
+								{% endfor %}
+							</table>
+							<h4 class="text-left"><strong>Corpora Information</strong></h4>
+							<table class="table table-hover table-condensed">	
+								{% for corpora_theme, statistics in corpora_statistics.items %}
+									{% if corpora_theme == theme %}
+										{% for index, value in statistics %}
+											<tr>
+												<td>{{ index }}</td>
+												<td>{{ value }}</td>
+											</tr>
+										{% endfor %}
+									{% endif %}
+								{% endfor %}
+							</table>
+						{% endif %}
+					</div>
+				</div>
 			{% endfor %}
 		</div>
 	</div>

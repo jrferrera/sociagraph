@@ -9,16 +9,22 @@ from sociagraph.utils import *
 
 
 def index(request):
+	application_name = "key-information-extractor"
 	template_name = 'theme_matcher/index.html'
 
-	return render(request, template_name)
+	return render(request, template_name, {
+		'application_name': application_name,
+		})
 
 
 def corpus(request):
+	application_name = "key-information-extractor"
 	template_name = 'theme_matcher/corpus.html'
 
 	# Get the corpora from the database
 	classified_corpus = Classified_Corpus.objects.all()
+
+	total_corpora_count = classified_corpus.count()
 
 	# Setup pagination
 	paginator = Paginator(classified_corpus, 10)
@@ -32,13 +38,21 @@ def corpus(request):
 	except EmptyPage:
 		corpora = paginator.page(paginator.num_pages)
 
+	new_classified_corpus = []
+
+	for corpus in corpora:
+		new_classified_corpus.append((corpus.text, corpus.theme.split(',')))
+
 	return render(request, template_name, {
-		'classified_corpus': corpora,
+		'application_name': application_name,
+		'classified_corpus': new_classified_corpus,
 		'items': corpora,
+		'total_corpora_count': total_corpora_count,
 		})
 
 
 def results(request):
+	application_name = "key-information-extractor"
 	template_name = 'theme_matcher/results.html'
 
 	themes = request.POST.get('theme')
@@ -145,6 +159,7 @@ def results(request):
 		# test = test_set
 
 	return render(request, template_name, {
+		'application_name': application_name,
 		'theme_definitions': theme_definitions,
 		'original_text': original_text,
 		'vocabulary_size': vocabulary_size,
@@ -160,9 +175,11 @@ def results(request):
 
 
 def add_corpus(request):
+	application_name = "key-information-extractor"
 	template_name = 'theme_matcher/add_corpus.html'
 
 	return_values = {}
+	return_values['application_name'] = application_name
 
 	if request.POST:
 		text = remove_extra_whitespaces(request.POST.get('text', False))
