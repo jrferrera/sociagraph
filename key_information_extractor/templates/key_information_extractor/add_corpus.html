@@ -1,13 +1,13 @@
 {% load staticfiles %}
 {% include 'includes/header.html' %}
-<link rel="stylesheet" type="text/css" href="{% static 'theme_matcher/style.css' %}" />
-<link rel="stylesheet" type="text/css" href="{% static 'theme_matcher/add_corpus.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'key_information_extractor/style.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'key_information_extractor/add_corpus.css' %}" />
 
 <div id="container" class="container-fluid">
 	<h3 class="alert alert-success">Add Corpus</h3>
 	{% include 'includes/notification.html' %}
 	<div id="corpus-adder">
-		<form id="corpus-adder-form" action="{% url 'theme_matcher:add_corpus' %}" method="post" role="form">
+		<form id="corpus-adder-form" action="{% url 'key_information_extractor:add_corpus' %}" method="post" role="form">
 		{% csrf_token %}
 			<div class="form-group">
 				<label for="text">Text</label>

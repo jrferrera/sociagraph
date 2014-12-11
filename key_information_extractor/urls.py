@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, url
 
-from theme_matcher import views
+from key_information_extractor import views
 
 urlpatterns = patterns('',
     url(r'^$', views.index, name='index'),

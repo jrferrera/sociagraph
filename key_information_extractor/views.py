@@ -10,7 +10,7 @@ from sociagraph.utils import *
 
 def index(request):
 	application_name = "key-information-extractor"
-	template_name = 'theme_matcher/index.html'
+	template_name = 'key_information_extractor/index.html'
 
 	return render(request, template_name, {
 		'application_name': application_name,
@@ -19,16 +19,18 @@ def index(request):
 
 def corpus(request):
 	application_name = "key-information-extractor"
-	template_name = 'theme_matcher/corpus.html'
+	template_name = 'key_information_extractor/corpus.html'
 
 	# Get the corpora from the database
 	classified_corpus = Classified_Corpus.objects.all()
 
+	# Count all corpora in the database
 	total_corpora_count = classified_corpus.count()
 
 	# Setup pagination
 	paginator = Paginator(classified_corpus, 10)
 
+	# Get the requested page
 	page = request.GET.get('page')
 
 	try:
@@ -40,6 +42,7 @@ def corpus(request):
 
 	new_classified_corpus = []
 
+	# Convert themes from string to list
 	for corpus in corpora:
 		new_classified_corpus.append((corpus.text, corpus.theme.split(',')))
 
@@ -53,8 +56,9 @@ def corpus(request):
 
 def results(request):
 	application_name = "key-information-extractor"
-	template_name = 'theme_matcher/results.html'
+	template_name = 'key_information_extractor/results.html'
 
+	# Get the input
 	themes = request.POST.get('theme')
 	original_text = request.POST.get('text')
 	
@@ -78,8 +82,6 @@ def results(request):
 	corpora_statistics = {}
 	# ==========================
 
-	test = ''
-
 	for theme in theme_list:
 		theme_definitions[theme] = get_word_definitions(theme)
 
@@ -88,9 +90,9 @@ def results(request):
 		not_theme = 'not_' + theme
 
 		# Get text with matching theme from database
-		# labeled_corpora = Classified_Corpus.objects.filter(theme__contains=theme).values('text')
 		labeled_corpora = Classified_Corpus.objects.filter(theme__contains=theme).values('text')
 		
+		# Count the corpora in the database
 		labeled_corpora_count = labeled_corpora.count()
 
 		if labeled_corpora_count >= 3:
@@ -134,29 +136,31 @@ def results(request):
 			test_set_reclassification = svm_classifier.classify_many(test_set_features)
 			classification_scores = get_classification_scores(test_set_correct_classifications, test_set_reclassification, [theme, not_theme])
 
-			classified_sentences = {}
+			classified_items = {}
 			keywords = []
 
 			for sentence in paragraph_to_sentences(original_text):
-				# classification_test = { word: (word in tokenize(sentence)) for word in feature_set_words }
 				classification_test = get_features(sentence, feature_set_words, theme)
 
 				# Get each theme classification per sentence
-				classified_sentences[sentence] = svm_classifier.classify(classification_test)
+				classified_items[sentence] = svm_classifier.classify(classification_test)
 
-				# Get keywords from sentences matching the theme
-				# if(classified_sentences[sentence].rstrip() == theme)
-				# 	classified_sentences[sentence]["keywords"] = get_keywords(sentence, theme)
+				word_count = len(tokenize(sentence))
 
-			theme_classification_results[theme] = classified_sentences
+				for counter in range(1, 3):
+					for ngram in get_ngrams(sentence, counter):
+						if is_possible_keyword(ngram):
+							classification_test = get_features(" ".join(ngram), feature_set_words, theme)
+							classified_items[" ".join(ngram)] = svm_classifier.classify(classification_test)
+
+			theme_classification_results[theme] = classified_items
 			theme_classification_statistics[theme] = classification_scores
-			corpora_statistics[theme] = sort_dictionary_by_key({ 'Corpora Total': labeled_corpora_count, 'Test Set Count': labeled_corpora_count, 'Train Set Count': labeled_corpora_count })
+			corpora_statistics[theme] = sort_dictionary_by_key({ 'Corpora Total': labeled_corpora_count, 'Test Set Count': labeled_corpora_count/2, 'Train Set Count': labeled_corpora_count/2 })
 		else:
+			# Output if there is not data
 			theme_classification_results[theme] = None
 			theme_classification_statistics[theme] = None
 			corpora_statistics[theme] = None
-
-		# test = test_set
 
 	return render(request, template_name, {
 		'application_name': application_name,
@@ -170,13 +174,12 @@ def results(request):
 		'theme_classification_results': theme_classification_results,
 		'theme_classification_statistics': theme_classification_statistics,
 		'corpora_statistics': corpora_statistics,
-		'test': test,
 		})
 
 
 def add_corpus(request):
 	application_name = "key-information-extractor"
-	template_name = 'theme_matcher/add_corpus.html'
+	template_name = 'key_information_extractor/add_corpus.html'
 
 	return_values = {}
 	return_values['application_name'] = application_name

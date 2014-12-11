@@ -1,7 +1,7 @@
 {% load staticfiles %}
 {% include 'includes/header.html' %}
-<link rel="stylesheet" type="text/css" href="{% static 'theme_matcher/style.css' %}" />
-<link rel="stylesheet" type="text/css" href="{% static 'theme_matcher/index.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'key_information_extractor/style.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'key_information_extractor/index.css' %}" />
 
 <div id="container" class="container-fluid">
 	<h3 class="alert alert-success">Key Information Extractor</h3>
@@ -9,10 +9,10 @@
 		The key information extractor classifies information in the text based on the themes provided. 
 	</p>
 	<p>
-		<strong>Note:</strong> The themes that can be used are limited to the themes in Sociagraph database. See <a href="{% url 'theme_matcher:corpus' %}">list of corpora</a> to see the available themes.
+		<strong>Note:</strong> The themes that can be used are limited to the themes in Sociagraph database. See <a href="{% url 'key_information_extractor:corpus' %}">list of corpora</a> to see the available themes.
 	</p>
 	<br />
-	<form id="theme-matcher-form" action="{% url 'theme_matcher:results' %}" method="post" role="form">
+	<form id="theme-matcher-form" action="{% url 'key_information_extractor:results' %}" method="post" role="form">
 	{% csrf_token %}
 		<div class="form-group">
 			<label for="theme">Theme</label>

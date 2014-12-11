@@ -1,7 +1,7 @@
 {% load staticfiles %}
 {% include 'includes/header.html' %}
-<link rel="stylesheet" type="text/css" href="{% static 'theme_matcher/style.css' %}" />
-<link rel="stylesheet" type="text/css" href="{% static 'theme_matcher/results.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'key_information_extractor/style.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'key_information_extractor/results.css' %}" />
 
 <div id="container" class="container-fluid">
 	<h3 class="alert alert-success">Key Information Extraction Results</h3>
@@ -33,9 +33,15 @@
 				<div class="panel-body">
 					{% for theme, definitions in theme_definitions.items %}
 						<strong>{{ theme }}</strong>
-						{% for definition in definitions %}
-							<li>{{ definition }}</li>
-						{% endfor %}
+						{% if definitions != None %}
+							{% for definition in definitions %}
+								<li>{{ definition }}</li>
+							{% endfor %}
+						{% else %}
+							<br />
+							No data.
+							<br />
+						{% endif %}
 						<br />
 					{% endfor %}
 				</div>
