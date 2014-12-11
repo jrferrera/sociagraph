@@ -37,7 +37,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'sociagraph',
-    'theme_matcher',
+    'key_information_extractor',
     'sentiment_analyzer',
 )
 

@@ -16,6 +16,7 @@
 
 	<div class="tab-content">
 		<div id="inputs" class="tab-pane fade in active">
+			{{ test }}
 			<div class="panel panel-default">
 				<div class="panel-heading">
 					<h3 class="panel-title"><strong>Input Statistics</strong></h3>
@@ -110,6 +111,9 @@
 			<div class="panel panel-default">
 				<div class="panel-body">
 					<h4 class="text-left"><strong>Sentiment Frequencies</strong></h4>
+					<br />
+					<h4 class="text-center"><b><i>Overall Sentiment: {{ overall_sentiment.upper }}</i></b></h4>
+					<br />
 					<table class="table table-hover table-condensed">
 						<tr>
 							<td class="table-header">Sentiment</td>
