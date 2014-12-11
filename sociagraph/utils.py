@@ -40,6 +40,14 @@ def get_vocabulary_count(text):
 def transform_to_text(text):
 	return nltk.Text(text)
 
+# Description: Get the stem of the word
+# Parameter/s: string
+# Return:	   string
+def stem(word):
+	stemmer = nltk.LancasterStemmer()
+	return stemmer.stem(word)
+
+
 # Description: Remove non-letters
 # Parameter/s: string
 # Return:	   string
@@ -95,7 +103,7 @@ def get_non_stopword_fraction(text):
 # Parameter/s: string
 # Return:	   tuple
 def tokenize(text):
-	text = regex.sub('[^A-Za-z0-9\- ]+', '', text)
+	text = regex.sub('[^A-Za-z0-9\.\- ]+', '', text)
 	return nltk.word_tokenize(unicode_to_string(text))
 
 # Description: Sort a dictionary by value
@@ -163,8 +171,30 @@ def get_pos_tag_values(list):
 		list[index] = list[index] + (get_pos_tag_value(list[index][1]),)
 	return list
 
+# Description: Check if possible keyword
+# Parameter/s: (..., )
+# Return:	   bool
+# Dependencies: get_pos_tag()
+def is_possible_keyword(word_list):
+	tags = ''
+	pattern = regex.compile(r"(ADJ ?)* (NN ?)+$|(NN ?)+$|(NN ?)+IN (NN ?)+$")
+
+	for word in word_list:
+		tags += nltk.pos_tag(lemmatize(word).split(" "))[0][1] + " "
+
+	tags = tags.rstrip()
+
+	return True if pattern.match(tags) is not None else False
+
 # Description: Generate bigrams
-# Parameter/s: string
+# Parameter/s: str | int
+# Return:	   list [ (..., ), ...]
+# Dependencies: tokenize()
+def get_ngrams(text, word_count):
+	return nltk.ngrams(tokenize(text), word_count)
+
+# Description: Generate bigrams
+# Parameter/s: str
 # Return:	   list
 def get_bigrams(text):
 	return list(nltk.bigrams(unicode_to_string(text).split(" ")))
@@ -177,11 +207,14 @@ def get_frequency_distribution(genre_word):
 
 # Description: Get the definition/s of the word
 # Parameter/s: string
-# Return:	   list
+# Return:	   list | None
 def get_word_definitions(word):
 	definitions = []
 	for synset in wordnet.synsets(word):
 		definitions.append(unicode_to_string(synset.definition()))
+
+	if len(definitions) == 0:
+		definitions = None
 	return definitions
 
 # Description: Get the synonyms
@@ -387,18 +420,54 @@ def get_features(text, feature_sets_words, theme):
 # Return:	    list [({ contains(word): True })]
 # Dependencies: get_features()
 def get_theme_corpus_feature_sets(combined_labeled_text, feature_set_words, theme):
-	# feature_sets = [ ({ word: (word in tokenize(item[0])) for word in feature_set_words }, item[1]) for item in combined_labeled_text ]
 	feature_sets = [ ( get_features(item[0].lower(), feature_set_words, theme), item[1]) for item in combined_labeled_text ]
 	
 	return feature_sets
+
+# Description:  Get the most frequent sentiment
+# Parameter/s:  dict { str: int, ... }
+# Return:	    str
+def get_most_frequent_sentiment(sentiment_frequencies):
+	max_sentiment = ''
+	max_frequency = None
+
+	for sentiment in sentiment_frequencies:
+		if max_frequency == None:
+			max_sentiment = sentiment
+			max_frequency = sentiment_frequencies[sentiment]
+		else:
+			if sentiment_frequencies[sentiment] > max_frequency:
+				max_sentiment = sentiment
+				max_frequency = sentiment_frequencies[sentiment]
+
+	return max_sentiment
+
+
+# Description:  Get the sentiment features
+# Parameter/s:  str | list
+# Return:	    dict { contains(word): True, synonymous }
+# Dependencies: tokenize() | is_synonymous() | lemmatize()
+def get_sentiment_features(text, feature_set_words, sentiments):
+	features = {}
+
+	for word in tokenize(text.lower()):
+		features.update({
+			'contains(' + word + ')': lemmatize(word) in feature_set_words
+			})
+
+		for sentiment in sentiments:
+			features['synonymous_to_' + sentiment + '(' + word + ')'] = is_synonymous(lemmatize(word), sentiment)
+
+	return features
 
 
 # Description:  Get the feature sets
 # Parameter/s:  [ (word, theme) ... ] | [ word, ... ] | str
 # Return:	    list [({ contains(word): True })]
 # Dependencies: get_features()
-def get_feature_sets(combined_labeled_text, feature_set_words):
-	feature_sets = [ ({ word: (lemmatize(word) in tokenize(item[0])) for word in feature_set_words }, item[1]) for item in combined_labeled_text ]
+def get_sentiment_feature_sets(combined_labeled_text, feature_set_words, sentiments):
+	# feature_sets = [ ({ word: (lemmatize(word) in tokenize(item[0])) for word in feature_set_words }, item[1]) for item in combined_labeled_text ]
+	feature_sets = [ (get_sentiment_features(item[0], feature_set_words, sentiments), item[1]) for item in combined_labeled_text ]
 	# feature_sets = [ ( get_features(item[0].lower(), feature_set_words, theme), item[1]) for item in combined_labeled_text ]
 	
 	return feature_sets

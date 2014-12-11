@@ -20,11 +20,13 @@ def corpus(request):
 	# Get the corpora from the database
 	sentiment_corpus = Sentiment_Corpus.objects.all()
 
+	# Count the total corpora in the database
 	total_corpora_count = sentiment_corpus.count()
 	
 	# Setup pagination
 	paginator = Paginator(sentiment_corpus, 10)
 
+	# Get requested page
 	page = request.GET.get('page')
 
 	try:
@@ -71,12 +73,19 @@ def results(request):
 	pos_tags = get_pos_tag_values(pos_tags)
 
 	# Get all text from database
-	labeled_corpora = Sentiment_Corpus.objects.order_by('?')[:10]
+	labeled_corpora = Sentiment_Corpus.objects.all()
+
+	# Count corpora in the database
+	labeled_corpora_count = labeled_corpora.count()
+
+	# ==== Output variables ====
 	corpora_statistics = {}
 	emotion_labeled_corpora = []
-	labeled_corpora_count = labeled_corpora.count()
+	overall_sentiment = ''
+	# ==========================
+
 	for corpus in labeled_corpora:
-		emotion_labeled_corpora.append((unicode_to_string(corpus.text), unicode_to_string(corpus.emotion)))
+		emotion_labeled_corpora.append((unicode_to_string(remove_stopwords(corpus.text)), unicode_to_string(corpus.emotion)))
 
 	shuffle_set(emotion_labeled_corpora)
 
@@ -84,7 +93,7 @@ def results(request):
 	feature_set_words = get_feature_set_words(emotion_labeled_corpora)
 
 	# Check if the words in a paragraph is in feature set words
-	feature_sets = get_feature_sets(emotion_labeled_corpora, feature_set_words)
+	feature_sets = get_sentiment_feature_sets(emotion_labeled_corpora, feature_set_words, sentiments)
 
 	set_size = len(feature_sets)/2
 	test_set = feature_sets[:set_size]
@@ -108,13 +117,13 @@ def results(request):
 	sentiment_frequency = { 'happy': 0, 'sad': 0, 'angry': 0, 'fearful': 0, 'neutral': 0 }
 
 	for sentence in paragraph_to_sentences(original_text):
-		classification_test = {word: (word in tokenize(remove_stopwords(sentence))) for word in feature_set_words }
+		classification_test = get_sentiment_features(sentence, feature_set_words, sentiments)
 
 		# Get each theme classification per sentence
 		classification = svm_classifier.classify(classification_test)
 		classified_sentences[sentence] = classification
 		sentiment_frequency.update({ classification: sentiment_frequency[classification]+1 })
-	test = sentiment_frequency
+	overall_sentiment = get_most_frequent_sentiment(sentiment_frequency)
 	corpora_statistics = sort_dictionary_by_key({ 'Corpora Total': labeled_corpora_count, 'Test Set Count': labeled_corpora_count/2, 'Train Set Count': labeled_corpora_count /2})
 	sentiment_frequency = sort_dictionary_by_value(sentiment_frequency)
 	return render(request, template_name, {
@@ -129,8 +138,8 @@ def results(request):
 		'bag_of_words': bag_of_words,
 		'sentiment_frequency': sentiment_frequency,
 		'classified_sentences': classified_sentences,
+		'overall_sentiment': overall_sentiment,
 		'sentiment_classification_statistics': sentiment_classification_statistics,
-		'test': test,
 		})
 
 def add_corpus(request):
