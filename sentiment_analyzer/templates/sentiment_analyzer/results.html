@@ -5,17 +5,78 @@
 
 <div id="container" class="container-fluid">
 	<h3 class="alert alert-success">Sentiment Analysis Results</h3>
+	{% include 'includes/notification.html' %}
 	<ul id="menu-tabs" class="nav nav-tabs" role="tablist">
-		<li class="active"><a href="#inputs" role="tab" data-toggle="tab">Inputs</a></li>
-		<li><a href="#tokens" role="tab" data-toggle="tab">Tokens</a></li>
-		<li><a href="#bag-of-words" role="tab" data-toggle="tab">Bag of Words</a></li>
-		<li><a href="#pos-tags" role="tab" data-toggle="tab">Part of Speech Tags</a></li>
-		<li><a href="#classification-results" role="tab" data-toggle="tab">Classification Results</a></li>
+		<li class="active"><a href="#classification-results" role="tab" data-toggle="tab">Classification Results</a></li>
 		<li><a href="#classification-statistics" role="tab" data-toggle="tab">Classification Statistics</a></li>
+		<li><a href="#inputs" role="tab" data-toggle="tab">Inputs</a></li>
+		<li><a href="#tokens" role="tab" data-toggle="tab">Tokens <span class="glyphicon glyphicon-question-sign" title="Tokens are the separated words in the text."></span></a></li>
+		<li><a href="#bag-of-words" role="tab" data-toggle="tab">Word Frequency</a></li>
+		<li><a href="#pos-tags" role="tab" data-toggle="tab">Part of Speech Tags</a></li>
 	</ul>
 
 	<div class="tab-content">
-		<div id="inputs" class="tab-pane fade in active">
+		<div id="classification-results" class="tab-pane fade in active">
+			<div class="panel panel-default">
+				<div class="panel-body">
+					<table class="table table-hover table-condensed">
+						<tr>
+							<td class="table-header">Sentence</td>
+							<td class="table-header">Sentiment</td>
+						</tr>
+						{% for sentence, sentiment in classified_sentences.items %}
+							<tr>
+								<td>{{ sentence }}</td>
+								<td>{{ sentiment }}</td>
+							</tr>
+						{% endfor %}
+					</table>
+				</div>
+			</div>
+		</div>
+
+		<div id="classification-statistics" class="tab-pane fade">
+			<div class="panel panel-default">
+				<div class="panel-body">
+					<h4 class="text-left"><strong>Sentiment Frequencies</strong></h4>
+					<br />
+					<h4 class="text-center"><b><i>Overall Sentiment: {{ overall_sentiment.upper }}</i></b></h4>
+					<br />
+					<table class="table table-hover table-condensed">
+						<tr>
+							<td class="table-header">Sentiment</td>
+							<td class="table-header">Frequency</td>
+						</tr>
+						{% for sentiment, frequency in sentiment_frequency %}
+							<tr>
+								<td>{{ sentiment }}</td>
+								<td>{{ frequency }}</td>
+							</tr>
+						{% endfor %}
+					</table>
+
+					<h4 class="text-left"><strong>Evaluation Metrics</strong></h4>
+					<table class="table table-hover table-condensed">
+						{% for category, score in sentiment_classification_statistics.items %}
+							<tr>
+								<td>{{ category.title }}</td>
+								<td>{{ score }}</td>
+							</tr>
+						{% endfor %}
+					</table>
+					<h4 class="text-left"><strong>Corpora Information</strong></h4>	
+					<table class="table table-hover table-condensed">	
+						{% for index, value in corpora_statistics %}
+							<tr>
+								<td>{{ index }}</td>
+								<td>{{ value }}</td>
+							</tr>
+						{% endfor %}
+					</table>
+				</div>
+			</div>
+		</div>
+		<div id="inputs" class="tab-pane fade in">
 			{{ test }}
 			<div class="panel panel-default">
 				<div class="panel-heading">
@@ -81,67 +142,6 @@
 							<tr>
 								<td>{{ word }}</td>
 								<td>{{ pos }}</td>
-							</tr>
-						{% endfor %}
-					</table>
-				</div>
-			</div>
-		</div>
-
-		<div id="classification-results" class="tab-pane fade">
-			<div class="panel panel-default">
-				<div class="panel-body">
-					<table class="table table-hover table-condensed">
-						<tr>
-							<td class="table-header">Sentence</td>
-							<td class="table-header">Sentiment</td>
-						</tr>
-						{% for sentence, sentiment in classified_sentences.items %}
-							<tr>
-								<td>{{ sentence }}</td>
-								<td>{{ sentiment }}</td>
-							</tr>
-						{% endfor %}
-					</table>
-				</div>
-			</div>
-		</div>
-
-		<div id="classification-statistics" class="tab-pane fade">
-			<div class="panel panel-default">
-				<div class="panel-body">
-					<h4 class="text-left"><strong>Sentiment Frequencies</strong></h4>
-					<br />
-					<h4 class="text-center"><b><i>Overall Sentiment: {{ overall_sentiment.upper }}</i></b></h4>
-					<br />
-					<table class="table table-hover table-condensed">
-						<tr>
-							<td class="table-header">Sentiment</td>
-							<td class="table-header">Frequency</td>
-						</tr>
-						{% for sentiment, frequency in sentiment_frequency %}
-							<tr>
-								<td>{{ sentiment }}</td>
-								<td>{{ frequency }}</td>
-							</tr>
-						{% endfor %}
-					</table>
-
-					<h4 class="text-left"><strong>Evaluation Metrics</strong></h4>
-					<table class="table table-hover table-condensed">
-						{% for category, score in sentiment_classification_statistics.items %}
-							<tr>
-								<td>{{ category.title }}</td>
-								<td>{{ score }}</td>
-							</tr>
-						{% endfor %}
-					</table>
-					<h4 class="text-left"><strong>Corpora Information</strong></h4>	
-					<table class="table table-hover table-condensed">	
-						{% for index, value in corpora_statistics %}
-							<tr>
-								<td>{{ index }}</td>
-								<td>{{ value }}</td>
 							</tr>
 						{% endfor %}
 					</table>

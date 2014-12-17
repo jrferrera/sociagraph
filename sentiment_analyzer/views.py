@@ -126,8 +126,14 @@ def results(request):
 	overall_sentiment = get_most_frequent_sentiment(sentiment_frequency)
 	corpora_statistics = sort_dictionary_by_key({ 'Corpora Total': labeled_corpora_count, 'Test Set Count': labeled_corpora_count/2, 'Train Set Count': labeled_corpora_count /2})
 	sentiment_frequency = sort_dictionary_by_value(sentiment_frequency)
+
+	notification_type = 'success'
+	notification_message = 'Successfully analyzed text sentiment.'
+
 	return render(request, template_name, {
 		'application_name': application_name,
+		'notification_type': notification_type,
+		'notification_message': notification_message,
 		'original_text': original_text,
 		'filtered_text': filtered_text,
 		'vocabulary_size': vocabulary_size,
@@ -157,9 +163,9 @@ def add_corpus(request):
 			Sentiment_Corpus(text=text, emotion=emotion).save()
 
 			return_values['notification_type'] = 'success'
-			return_values['notification_message'] = 'Successfully added a corpus.'
+			return_values['notification_message'] = 'Successfully added a sentiment-labeled data.'
 		else:
 			return_values['notification_type'] = 'error'
-			return_values['notification_message'] = 'Failed to add corpus.'
+			return_values['notification_message'] = 'Failed to add sentiment-labeled data.'
 
 	return render(request, template_name, return_values)

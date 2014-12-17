@@ -4,18 +4,18 @@
 <link rel="stylesheet" type="text/css" href="{% static 'sentiment_analyzer/add_corpus.css' %}" />
 
 <div id="container" class="container-fluid">
-	<h3 class="alert alert-success">Add Corpus</h3>
+	<h3 class="alert alert-success">Add Sentiment Data</h3>
 	{% include 'includes/notification.html' %}
 	<div id="corpus-adder">
 		<form id="corpus-adder-form" action="{% url 'sentiment_analyzer:add_corpus' %}" method="post" role="form">
 		{% csrf_token %}
 			<div class="form-group">
 				<label for="text">Text</label>
-				<textarea name="text" id="text" class="form-control" rows="9" cols="40" placeholder="Enter text" required></textarea>
+				<textarea name="text" id="text" class="form-control" rows="9" cols="40" title="Type/Place the text that express the emotion that you will provide." placeholder="Enter text" required></textarea>
 			</div>
 			<div class="form-group">
-				<label for="sentiment">Sentiment</label>
-				<select name="sentiment" id="sentiment" class="form-control">
+				<label for="sentiment">Sentiment <span class="glyphicon glyphicon-question-sign" title="Sentiment is the emotion mostly expressed in the text."></span></label>
+				<select name="sentiment" id="sentiment" class="form-control" title="Select the emotion mostly expressed in the text.">
 					<option value="neutral">Neutral</option>
 					<option value="happy">Happy</option>
 					<option value="sad">Sad</option>
@@ -23,7 +23,7 @@
 					<option value="fearful">Fearful</option>
 				</select>
 			</div>
-			<div class="text-center"><input type="submit" class="btn btn-success" value="Add Corpus" /></div>
+			<div class="text-center"><input type="submit" class="btn btn-success" value="Add Sentiment Data" /></div>
 		</form>
 	</div>
 </div>

@@ -156,14 +156,20 @@ def results(request):
 			theme_classification_results[theme] = classified_items
 			theme_classification_statistics[theme] = classification_scores
 			corpora_statistics[theme] = sort_dictionary_by_key({ 'Corpora Total': labeled_corpora_count, 'Test Set Count': labeled_corpora_count/2, 'Train Set Count': labeled_corpora_count/2 })
+			notification_type = 'success'
+			notification_message = 'Successfully extracted key information'
 		else:
 			# Output if there is not data
 			theme_classification_results[theme] = None
 			theme_classification_statistics[theme] = None
 			corpora_statistics[theme] = None
+			notification_type = 'error'
+			notification_message = 'Failed to extract all key information. Some themes are not in the database.'
 
 	return render(request, template_name, {
 		'application_name': application_name,
+		'notification_type': notification_type,
+		'notification_message': notification_message,
 		'theme_definitions': theme_definitions,
 		'original_text': original_text,
 		'vocabulary_size': vocabulary_size,
@@ -192,9 +198,9 @@ def add_corpus(request):
 			Classified_Corpus(text=text, theme=theme).save()
 
 			return_values['notification_type'] = 'success'
-			return_values['notification_message'] = 'Successfully added a corpus.'
+			return_values['notification_message'] = 'Successfully added a theme-classified data.'
 		else:
 			return_values['notification_type'] = 'error'
-			return_values['notification_message'] = 'Failed to add corpus.'
+			return_values['notification_message'] = 'Failed to add theme-classified data.'
 
 	return render(request, template_name, return_values)

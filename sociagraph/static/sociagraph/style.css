@@ -46,6 +46,10 @@
 	margin-left: 40px;
 }
 
+.glyphicon {
+	color: #428BCA;
+}
+
 /* Responsive */
 @media all and (max-width: 768px) {
 	#container {
