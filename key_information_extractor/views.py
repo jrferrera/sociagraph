@@ -90,7 +90,7 @@ def results(request):
 		not_theme = 'not_' + theme
 
 		# Get text with matching theme from database
-		labeled_corpora = Classified_Corpus.objects.filter(theme__contains=theme).values('text')
+		labeled_corpora = Classified_Corpus.objects.filter(theme__contains=theme).values('text').order_by('?')
 		
 		# Count the corpora in the database
 		labeled_corpora_count = labeled_corpora.count()
@@ -145,13 +145,13 @@ def results(request):
 				# Get each theme classification per sentence
 				classified_items[sentence] = svm_classifier.classify(classification_test)
 
-				word_count = len(tokenize(sentence))
+				# word_count = len(tokenize(sentence))
 
-				for counter in range(1, 3):
-					for ngram in get_ngrams(sentence, counter):
-						if is_possible_keyword(ngram):
-							classification_test = get_features(" ".join(ngram), feature_set_words, theme)
-							classified_items[" ".join(ngram)] = svm_classifier.classify(classification_test)
+				# for counter in range(1, 3):
+				# 	for ngram in get_ngrams(sentence, counter):
+				# 		if is_possible_keyword(ngram):
+				# 			classification_test = get_features(" ".join(ngram), feature_set_words, theme)
+				# 			classified_items[" ".join(ngram)] = svm_classifier.classify(classification_test)
 
 			theme_classification_results[theme] = classified_items
 			theme_classification_statistics[theme] = classification_scores

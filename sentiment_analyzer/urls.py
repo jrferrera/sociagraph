@@ -7,4 +7,5 @@ urlpatterns = patterns('',
     url(r'^results/$', views.results, name='results'),
     url(r'^corpus/$', views.corpus, name='corpus'),
     url(r'^add_corpus/$', views.add_corpus, name='add_corpus'),
+    url(r'^upload_corpus/$', views.upload_corpus, name='upload_corpus'),
 )

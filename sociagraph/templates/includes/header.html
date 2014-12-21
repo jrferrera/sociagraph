@@ -1,6 +1,6 @@
 {% load staticfiles %}
-
-<html>
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:"en-us" }}" {% if LANGUAGE_BIDI %}dir="rtl"{% endif %}>
 	<head>
 		<title>Sociagraph</title>
 		<link rel="stylesheet" type="text/css" href="{% static 'sociagraph/bootstrap.min.css' %}" />
@@ -9,7 +9,7 @@
 	</head>
 
 	<body>
-		<nav id="header" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+		<nav id="sociagraph-header" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
 			<div class="container-fluid">
 				<div class="navbar-header">
 					<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse">
@@ -25,22 +25,45 @@
 				<div class="collapse navbar-collapse" id="navbar-collapse">
 					<ul class="nav navbar-nav">
 						<li class="active"><span class="sr-only"></span></li>
-							<li class="dropdown" id="key-information-extractor-nav">
+						{% if user.is_active and user.is_staff %}
+							<li class="dropdown" id="menu-nav">
 								<a href="#" class="dropdown-toggle header-menu-item" data-toggle="dropdown">
-									{% if application_name == "key-information-extractor" %}
-										<span class="active-menu">Key Information Extractor</span>
+									{% if application_name == "admin" %}
+										<span class="active-menu">{% firstof user.get_short_name user.get_username %}</span>
 										<span class="caret active-menu"></span>
 									{% else %}
-										<span>Key Information Extractor</span> <span class="caret"></span>
+										<span>{% firstof user.get_short_name user.get_username %}</span> <span class="caret"></span>
 									{% endif %}
 								</a>
 								<ul class="dropdown-menu" role="menu">
-									<li><a href="{% url 'key_information_extractor:index' %}"><span class="glyphicon glyphicon-filter"></span> Extract Key Information</a></li>
-									<li class="divider"></li>
-										<li><a href="{% url 'key_information_extractor:corpus' %}"><span class="glyphicon glyphicon-th-list"></span> Theme-classified Data</a></li>
-										<li><a href="{% url 'key_information_extractor:add_corpus' %}"><span class="glyphicon glyphicon-plus"></span> Add Themed Data</a></li>
+									<li><a href="{% url 'admin:index' %}"> Admin Home</a></li>
+									{% if user.has_usable_password %}
+										<li><a href="{% url 'admin:password_change' %}"> Change Password</a></li>
+									{% endif %}
+									<li><a href="{% url 'admin:logout' %}"> Logout</a></li>
 								</ul>
 							</li>
+						{% else %}
+							<li class="dropdown" id="menu-nav">
+								<a href="{% url 'admin:index' %}">Login</a>
+							</li>
+						{% endif %}
+						<li class="dropdown" id="key-information-extractor-nav">
+							<a href="#" class="dropdown-toggle header-menu-item" data-toggle="dropdown">
+								{% if application_name == "key-information-extractor" %}
+									<span class="active-menu">Key Information Extractor</span>
+									<span class="caret active-menu"></span>
+								{% else %}
+									<span>Key Information Extractor</span> <span class="caret"></span>
+								{% endif %}
+							</a>
+							<ul class="dropdown-menu" role="menu">
+								<li><a href="{% url 'key_information_extractor:index' %}"><span class="glyphicon glyphicon-filter"></span> Extract Key Information</a></li>
+								<li class="divider"></li>
+									<li><a href="{% url 'key_information_extractor:corpus' %}"><span class="glyphicon glyphicon-th-list"></span> Theme-classified Data</a></li>
+									<li><a href="{% url 'key_information_extractor:add_corpus' %}"><span class="glyphicon glyphicon-plus"></span> Add Themed Data</a></li>
+							</ul>
+						</li>
 						<li class="dropdown" id="sentiment-analyzer-nav">
 							<a href="#" class="dropdown-toggle header-menu-item" data-toggle="dropdown">
 								{% if application_name == "sentiment-analyzer" %}

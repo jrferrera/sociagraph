@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from sociagraph.models import Sentiment_Corpus
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from sociagraph.utils import *
+from sociagraph.forms import UploadFileForm
 
 def index(request):
 	application_name = "sentiment-analyzer"
@@ -73,6 +74,7 @@ def results(request):
 	pos_tags = get_pos_tag_values(pos_tags)
 
 	# Get all text from database
+	# labeled_corpora = Sentiment_Corpus.objects.all()
 	labeled_corpora = Sentiment_Corpus.objects.all()
 
 	# Count corpora in the database
@@ -169,3 +171,17 @@ def add_corpus(request):
 			return_values['notification_message'] = 'Failed to add sentiment-labeled data.'
 
 	return render(request, template_name, return_values)
+
+def upload_corpus(request):
+	return_values = {}
+	filename = request.POST.get('corpus_file')
+	if request.method == 'POST':
+		form = UploadFileForm(request.POST, request.FILES)
+		if form.is_valid():
+			form = request.FILES['corpus_file']
+	else:
+		form = UploadFileForm()
+	return_values['notification_type'] = 'error'
+	return_values['notification_message'] = 'Failed to add sentiment-labeled data.'
+
+	return render(request, 'admin/upload_message.html', {'form': filename})
